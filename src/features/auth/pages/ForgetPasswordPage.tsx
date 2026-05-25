@@ -9,7 +9,7 @@ import Input from "../components/Input";
 import SubmitButton from "../components/SubmitButton";
 
 import { FormContext } from "@/context/FormContext";
-import { requestOtp } from "@/features/auth/services/authService";
+import { requestPasswordReset } from "@/services/authService";
 
 export default function ForgetPasswordPage() {
     const {user, setUser, setInputErrors} = useContext(FormContext); 
@@ -19,7 +19,7 @@ export default function ForgetPasswordPage() {
         e.preventDefault();
 
         try {
-                await requestOtp(user.email);
+                await requestPasswordReset(user.email);
                 
                 setUser({firstName : "", secondName : "", email : "", password : "", confirmPassword : ""});
                 

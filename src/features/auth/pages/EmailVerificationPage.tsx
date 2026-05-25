@@ -11,7 +11,7 @@ import SubmitButton from "../components/SubmitButton";
 import { FormContext } from "@/context/FormContext";
 
 import SuccessMessagePage from "./SuccessMessagePage";
-import { requestOtp, verifyOtp } from "@/features/auth/services/authService";
+import { requestOtp, verifyOtp } from "@/services/authService";
 
 
 export default function EmailVerificationPage() {

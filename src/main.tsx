@@ -1,17 +1,21 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
 
-import './index.css'
-import App from './App.tsx'
-import { AuthContextProvider } from '@/context/AuthContext.tsx'
+import "./index.css";
+import "leaflet/dist/leaflet.css";          
+import "@/utils/fixLeafletIcon";            
+import "react-day-picker/style.css";        
 
-createRoot(document.getElementById('root')!).render(
-  <AuthContextProvider>
+import App from "./App";
+import { ToastProvider } from "@/context/ToastContext";
+
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
-      <App />
+      <ToastProvider>
+        <App />
+      </ToastProvider>
     </BrowserRouter>
   </StrictMode>
-  </AuthContextProvider>,
-)
+);

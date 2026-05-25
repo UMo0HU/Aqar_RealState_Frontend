@@ -11,7 +11,7 @@ import OAuthOptions from "../components/OAuthOptions";
 import SubmitButton from "../components/SubmitButton";
 
 import { FormContext } from "@/context/FormContext";
-import { signup } from "@/features/auth/services/authService";
+import { signup } from "@/services/authService";
 
 export default function SignupPage () {
     const {user, inputErrors, setInputErrors} = useContext(FormContext); 

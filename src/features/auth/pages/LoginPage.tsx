@@ -15,7 +15,7 @@ import { FormContext } from "@/context/FormContext";
 import { useAuth } from "@/context/AuthContext";
 
 import axios from 'axios'
-import { login, requestOtp } from "@/features/auth/services/authService";
+import { login, requestOtp } from "@/services/authService";
 
 export default function LoginPage() {
   const {user, inputErrors, setInputErrors} = useContext(FormContext); 

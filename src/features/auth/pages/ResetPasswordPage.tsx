@@ -12,7 +12,7 @@ import { FormContext } from "@/context/FormContext";
 
 import axios from "axios";
 import SuccessMessagePage from "./SuccessMessagePage";
-import { resetPassword } from "@/features/auth/services/authService";
+import { resetPassword } from "@/services/authService";
 
 export default function ResetPasswordPage() {
     const {user, inputErrors, setUser} = useContext(FormContext);
