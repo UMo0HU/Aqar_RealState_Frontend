@@ -8,6 +8,11 @@ export const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: 10000,
+  headers: {
+    // THIS is the line that stops ngrok from returning the HTML error page
+    'ngrok-skip-browser-warning': 'true',
+    'Content-Type': 'application/json'
+  }
 });
 
 // Attach JWT on every request
