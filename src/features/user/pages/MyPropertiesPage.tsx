@@ -3,6 +3,7 @@ import { Link, useNavigate }   from "react-router-dom";
 import axios                   from "axios";
 
 import NavBar                        from "@/features/properties/components/NavBar";
+import SponsorshipModal              from "@/features/subscription/components/SponsorshipModal";
 import {
   getMyProperties,
   deleteProperty,
@@ -24,6 +25,7 @@ export default function MyPropertiesPage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading,    setLoading]    = useState(true);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [boostProperty, setBoostProperty] = useState<Property | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -211,6 +213,15 @@ export default function MyPropertiesPage() {
                       Selling Plan
                     </button>
                   )}
+                  {p.isVerified && (
+                    <button
+                      type="button"
+                      onClick={() => setBoostProperty(p)}
+                      className="text-xs px-3.5 py-1.5 border border-amber-300 bg-amber-50 text-amber-800 rounded-lg font-bold hover:bg-amber-100 transition"
+                    >
+                      {p.property_type === "for_rent" ? "Boost" : "Sponsor"}
+                    </button>
+                  )}
                   <button
                     onClick={() => handleDelete(p.propertyId, p.propertyName)}
                     disabled={deletingId === p.propertyId}
@@ -225,6 +236,12 @@ export default function MyPropertiesPage() {
 
         </div>
       </div>
+      {boostProperty && (
+        <SponsorshipModal
+          property={boostProperty}
+          onClose={() => setBoostProperty(null)}
+        />
+      )}
     </>
   );
 }

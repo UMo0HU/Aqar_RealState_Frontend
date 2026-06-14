@@ -9,6 +9,7 @@ import {
 import { useAuth }  from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import { addToFavorites, removeFromFavorites } from "@/services/favoriteService";
+import { isLocallySponsoredProperty } from "@/services/sponsorshipService";
 import type { Property } from "@/types";
 
 interface Props {
@@ -25,6 +26,7 @@ const PropertyCard: FC<Props> = ({ property, isFav = false, onFavChange }) => {
   const [toggling, setToggling] = useState(false);
 
   const isSale  = property.property_type === "for_sale";
+  const locallyPromoted = isLocallySponsoredProperty(property.propertyId);
   // Owner should not see the fav heart on their own property
   const isOwner = !!userInfo && userInfo.id === property.ownerId;
 
@@ -83,6 +85,12 @@ const PropertyCard: FC<Props> = ({ property, isFav = false, onFavChange }) => {
           ${isSale ? "bg-amber-300 text-black" : "bg-dark-knight text-white"}`}>
           {isSale ? "For Sale" : "For Rent"}
         </span>
+
+        {locallyPromoted && (
+          <span className="absolute left-2.5 top-9 rounded-full bg-white px-2.5 py-0.5 text-[11px] font-bold text-amber-700 shadow-sm">
+            Promoted
+          </span>
+        )}
 
         {/* Heart — hidden for the owner of this property */}
         {isAuthenticated && !isOwner && onFavChange && (

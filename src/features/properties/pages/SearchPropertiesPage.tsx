@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
+import axios from "axios";
 
 import NavBar          from "@/features/properties/components/NavBar";
 import PropertyCard    from "@/features/properties/components/PropertyCard";
@@ -10,12 +11,17 @@ import { mapProperty }   from "@/utils/mapProperty";
 import { isPubliclyVisibleProperty } from "@/utils/propertyListing";
 import { useFavIds }     from "@/hooks/useFavIds";
 import type { Property } from "@/types";
-
-const AI_SEARCH_URL = "https://aqar-ai-production.up.railway.app/search";
+import { searchAiProperties } from "@/services/aiService";
+import { getProperties } from "@/services/propertyService";
+import { sortPropertiesWithLocalSponsorship } from "@/services/sponsorshipService";
+import { getApiErrorMessage } from "@/utils/apiError";
+import { useToast } from "@/context/ToastContext";
 
 export default function SearchPropertiesPage() {
   const [searchParams] = useSearchParams();
   const navigate       = useNavigate();
+  const toast          = useToast();
+  const toastRef       = useRef(toast);
   const query          = searchParams.get("q") ?? "";
 
   const [favIds, setFavIds] = useFavIds();
@@ -23,30 +29,72 @@ export default function SearchPropertiesPage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading,    setLoading]    = useState(false);
   const [error,      setError]      = useState<string | null>(null);
+  const [draftQuery, setDraftQuery] = useState(query);
+
+  useEffect(() => {
+    toastRef.current = toast;
+  }, [toast]);
+
+  useEffect(() => {
+    setDraftQuery(query);
+  }, [query]);
 
   useEffect(() => {
     if (!query.trim()) return;
+    let cancelled = false;
     setLoading(true);
     setError(null);
     setProperties([]);
 
-    fetch(`${AI_SEARCH_URL}?q=${encodeURIComponent(query)}`)
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then((data) => {
-        const raw: any[] = Array.isArray(data) ? data : (data.results ?? []);
-        setProperties(raw.map(mapProperty).filter((p: Property) => isPubliclyVisibleProperty(p)));
-      })
-      .catch(() => setError("Search failed. Please check your connection and try again."))
-      .finally(() => setLoading(false));
+    const runSearch = async () => {
+      try {
+        const aiResults = await searchAiProperties(query);
+        if (cancelled) return;
+
+        setProperties(sortPropertiesWithLocalSponsorship(aiResults.filter((p) => isPubliclyVisibleProperty(p))));
+      } catch (aiError) {
+        if (cancelled) return;
+
+        toastRef.current.error(getApiErrorMessage(aiError, "AI search is unavailable. Showing matching listings instead."));
+
+        try {
+          const fallback = await getProperties({ location: query });
+          if (cancelled) return;
+
+          setProperties(sortPropertiesWithLocalSponsorship(
+            (fallback.data as unknown[])
+              .map(mapProperty)
+              .filter((p: Property) => isPubliclyVisibleProperty(p)),
+          ));
+        } catch (fallbackError) {
+          if (cancelled) return;
+          setError(
+            axios.isAxiosError(fallbackError)
+              ? getApiErrorMessage(fallbackError, "Search failed. Please try again.")
+              : "Search failed. Please check your connection and try again.",
+          );
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    runSearch();
+
+    return () => {
+      cancelled = true;
+    };
   }, [query]);
 
-  const handleSearch = (q: string) => {
-    if (!q.trim()) return;
-    navigate(`/search?q=${encodeURIComponent(q.trim())}`);
-  };
+  const handleSearch = useCallback((q: string) => {
+    const nextQuery = q.trim();
+    if (!nextQuery) {
+      navigate("/search");
+      return;
+    }
+    if (nextQuery === query) return;
+    navigate(`/search?q=${encodeURIComponent(nextQuery)}`);
+  }, [navigate, query]);
 
   const handleFavChange = (propertyId: number, next: boolean) => {
     setFavIds((prev) => {
@@ -71,7 +119,14 @@ export default function SearchPropertiesPage() {
               Results for: <span className="text-amber-500">"{query}"</span>
             </h1>
             <div className="flex justify-start">
-              <SearchBar onSearch={handleSearch} placeholder="Refine your search…" />
+              <SearchBar
+                value={draftQuery}
+                onQueryChange={setDraftQuery}
+                onSearch={handleSearch}
+                onDebouncedSearch={handleSearch}
+                debounceMs={400}
+                placeholder="Describe what you want…"
+              />
             </div>
           </div>
 

@@ -5,6 +5,7 @@ import { ChatSyncProvider }     from "@/context/ChatSyncProvider";
 import { NotificationsProvider } from "@/context/NotificationsContext";
 import { useAuthGuard }        from "@/hooks/useAuthGuard";
 import ProtectedRoute          from "@/routes/ProtectedRoute";
+import AIChatbot               from "@/features/ai/components/AIChatbot";
 
 // ─── Property ─────────────────────────────────────────────────────────────────
 import Home                 from "@/features/properties/pages/HomePage";
@@ -12,6 +13,7 @@ import PropertyPage         from "@/features/properties/pages/PropertyPage";
 import AddPropertyPage      from "@/features/properties/pages/AddPropertyPage";
 import SearchPropertiesPage from "@/features/properties/pages/SearchPropertiesPage";
 import PropertiesPage       from "@/features/properties/pages/PropertiesPage";
+import ReviewPage           from "@/features/properties/pages/ReviewPage";
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 import AuthLayout            from "@/features/auth/AuthLayout";
@@ -37,8 +39,11 @@ import LeasesPage from "@/features/lease/pages/LeasesPage";
 // ─── Payment ──────────────────────────────────────────────────────────────────
 import PaymentPage        from "@/features/payment/pages/PaymentPage";
 import PaymentSuccessPage from "@/features/payment/pages/PaymentSuccessPage";
+import InvoicePaymentStatusPage from "@/features/payment/pages/InvoicePaymentStatusPage";
+import RentDueBanner from "@/features/payment/components/RentDueBanner";
 import PropertySubscriptionPage from "@/features/subscription/pages/PropertySubscriptionPage";
 import SubscriptionPaymentStatusPage from "@/features/subscription/pages/SubscriptionPaymentStatusPage";
+import SponsorshipPaymentStatusPage from "@/features/subscription/pages/SponsorshipPaymentStatusPage";
 
 // ─── Chat ──────────────────────────────────────────────────────────────────
 import ChatInboxPage  from "@/features/chat/pages/ChatInboxPage";
@@ -49,45 +54,52 @@ function AppContent() {
   useAuthGuard();
 
   return (
-    <Routes>
-      {/* Public */}
-      <Route path="/"                  element={<Home />} />
-      <Route path="/properties"        element={<PropertiesPage />} />
-      <Route path="/search"            element={<SearchPropertiesPage />} />
-      <Route path="/buy/property/:id"  element={<PropertyPage />} />
-      <Route path="/rent/property/:id" element={<PropertyPage />} />
+    <>
+      <Routes>
+        {/* Public */}
+        <Route path="/"                  element={<Home />} />
+        <Route path="/properties"        element={<PropertiesPage />} />
+        <Route path="/search"            element={<SearchPropertiesPage />} />
+        <Route path="/buy/property/:id"  element={<PropertyPage />} />
+        <Route path="/rent/property/:id" element={<PropertyPage />} />
+        <Route path="/review/:propertyId" element={<ProtectedRoute><ReviewPage /></ProtectedRoute>} />
 
-      {/* Auth */}
-      <Route path="/auth" element={<AuthLayout />}>
-        <Route path="signup"                element={<SignupPage />} />
-        <Route path="login"                 element={<LoginPage />} />
-        <Route path="reset-password/:token" element={<ResetPasswordPage />} />
-        <Route path="forget-password"       element={<ForgetPasswordPage />} />
-        <Route path="verify-email"          element={<EmailVerificationPage />} />
-      </Route>
+        {/* Auth */}
+        <Route path="/auth" element={<AuthLayout />}>
+          <Route path="signup"                element={<SignupPage />} />
+          <Route path="login"                 element={<LoginPage />} />
+          <Route path="reset-password/:token" element={<ResetPasswordPage />} />
+          <Route path="forget-password"       element={<ForgetPasswordPage />} />
+          <Route path="verify-email"          element={<EmailVerificationPage />} />
+        </Route>
 
 
-      {/* Protected */}
-      <Route path="/property/add-property" element={<ProtectedRoute><AddPropertyPage /></ProtectedRoute>} />
-      <Route path="/profile"               element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-      <Route path="/my-properties"         element={<ProtectedRoute><MyPropertiesPage /></ProtectedRoute>} />
-      <Route path="/property/:id/edit"     element={<ProtectedRoute><EditPropertyPage /></ProtectedRoute>} />
-      <Route path="/favorites"             element={<ProtectedRoute><FavoritesPage /></ProtectedRoute>} />
-      <Route path="/notifications"         element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
-      <Route path="/rent-requests"         element={<ProtectedRoute><RentRequestsListPage /></ProtectedRoute>} />
-      <Route path="/leases"                element={<ProtectedRoute><LeasesPage /></ProtectedRoute>} />
-      
-      {/* Chat — protected */}
-      <Route path="/chat"           element={<ProtectedRoute><ChatInboxPage  /></ProtectedRoute>} />
-      <Route path="/chat/start"     element={<ProtectedRoute><NewChatPage    /></ProtectedRoute>} />
-      <Route path="/chat/:chat_id"  element={<ProtectedRoute><ChatWindowPage /></ProtectedRoute>} />
+        {/* Protected */}
+        <Route path="/property/add-property" element={<ProtectedRoute><AddPropertyPage /></ProtectedRoute>} />
+        <Route path="/profile"               element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+        <Route path="/my-properties"         element={<ProtectedRoute><MyPropertiesPage /></ProtectedRoute>} />
+        <Route path="/property/:id/edit"     element={<ProtectedRoute><EditPropertyPage /></ProtectedRoute>} />
+        <Route path="/favorites"             element={<ProtectedRoute><FavoritesPage /></ProtectedRoute>} />
+        <Route path="/notifications"         element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+        <Route path="/rent-requests"         element={<ProtectedRoute><RentRequestsListPage /></ProtectedRoute>} />
+        <Route path="/leases"                element={<ProtectedRoute><LeasesPage /></ProtectedRoute>} />
+        
+        {/* Chat — protected */}
+        <Route path="/chat"           element={<ProtectedRoute><ChatInboxPage  /></ProtectedRoute>} />
+        <Route path="/chat/start"     element={<ProtectedRoute><NewChatPage    /></ProtectedRoute>} />
+        <Route path="/chat/:chat_id"  element={<ProtectedRoute><ChatWindowPage /></ProtectedRoute>} />
 
-      {/* Payment — success is public (Kashier redirects here after payment) */}
-      <Route path="/payment/success" element={<PaymentSuccessPage />} />
-      <Route path="/payment/subscription/success" element={<SubscriptionPaymentStatusPage />} />
-      <Route path="/payment/:id"     element={<ProtectedRoute><PaymentPage /></ProtectedRoute>} />
-      <Route path="/property/:id/subscription" element={<ProtectedRoute><PropertySubscriptionPage /></ProtectedRoute>} />
-    </Routes>
+        {/* Payment — success is public (Kashier redirects here after payment) */}
+        <Route path="/payment/success" element={<PaymentSuccessPage />} />
+        <Route path="/payment/invoice/success" element={<InvoicePaymentStatusPage />} />
+        <Route path="/payment/subscription/success" element={<SubscriptionPaymentStatusPage />} />
+        <Route path="/payment/sponsor/success" element={<SponsorshipPaymentStatusPage />} />
+        <Route path="/payment/:id"     element={<ProtectedRoute><PaymentPage /></ProtectedRoute>} />
+        <Route path="/property/:id/subscription" element={<ProtectedRoute><PropertySubscriptionPage /></ProtectedRoute>} />
+      </Routes>
+      <RentDueBanner />
+      <AIChatbot />
+    </>
   );
 }
 

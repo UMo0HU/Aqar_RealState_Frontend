@@ -2,6 +2,7 @@ import axios from "@/api/axiosInstance";
 
 const PENDING_RENT_PAYMENT_KEY = "pending_rent_payment";
 const PENDING_SUBSCRIPTION_PAYMENT_KEY = "pending_subscription_payment";
+const PENDING_INVOICE_PAYMENT_KEY = "pending_invoice_payment";
 const LOCAL_PAYMENT_HOSTS = new Set(["localhost", "127.0.0.1", "0.0.0.0"]);
 
 export type PendingRentPayment = {
@@ -12,6 +13,11 @@ export type PendingRentPayment = {
 export type PendingSubscriptionPayment = {
   propertyId: number;
   subscriptionId: string;
+  createdAt: number;
+};
+
+export type PendingInvoicePayment = {
+  invoiceId: string;
   createdAt: number;
 };
 
@@ -27,6 +33,15 @@ export const getSubscriptionPaymentLink = (
 ) =>
   axios.post("/api/payment/", {
     subscription_id: subscriptionId,
+    redirect: redirectUrl,
+  });
+
+export const getInvoicePaymentLink = (
+  invoiceId: string,
+  redirectUrl: string,
+) =>
+  axios.post("/api/payment/", {
+    invoice_id: invoiceId,
     redirect: redirectUrl,
   });
 
@@ -71,6 +86,13 @@ export const buildSubscriptionPaymentSuccessUrl = (
   successUrl.searchParams.set("property_id", String(propertyId));
   successUrl.searchParams.set("subscription_id", subscriptionId);
   successUrl.searchParams.set("source", "sale_subscription");
+  return successUrl.toString();
+};
+
+export const buildInvoicePaymentSuccessUrl = (invoiceId: string) => {
+  const successUrl = new URL("/payment/invoice/success", resolvePaymentAppUrl());
+  successUrl.searchParams.set("invoice_id", invoiceId);
+  successUrl.searchParams.set("source", "invoice");
   return successUrl.toString();
 };
 
@@ -128,4 +150,30 @@ export const loadPendingSubscriptionPayment = (): PendingSubscriptionPayment | n
 
 export const clearPendingSubscriptionPayment = () => {
   sessionStorage.removeItem(PENDING_SUBSCRIPTION_PAYMENT_KEY);
+};
+
+export const savePendingInvoicePayment = (invoiceId: string) => {
+  const payload: PendingInvoicePayment = {
+    invoiceId,
+    createdAt: Date.now(),
+  };
+
+  sessionStorage.setItem(PENDING_INVOICE_PAYMENT_KEY, JSON.stringify(payload));
+};
+
+export const loadPendingInvoicePayment = (): PendingInvoicePayment | null => {
+  const raw = sessionStorage.getItem(PENDING_INVOICE_PAYMENT_KEY);
+  if (!raw) return null;
+
+  try {
+    const parsed = JSON.parse(raw) as PendingInvoicePayment;
+    if (!parsed.invoiceId) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+};
+
+export const clearPendingInvoicePayment = () => {
+  sessionStorage.removeItem(PENDING_INVOICE_PAYMENT_KEY);
 };

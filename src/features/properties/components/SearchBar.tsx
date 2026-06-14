@@ -1,14 +1,42 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent, ChangeEvent } from "react";
 import SearchIcon from "@/assets/Search.svg";
 
 interface Props {
   onSearch?:    (query: string) => void;
   placeholder?: string;
+  value?: string;
+  initialValue?: string;
+  onQueryChange?: (query: string) => void;
+  onDebouncedSearch?: (query: string) => void;
+  debounceMs?: number;
 }
 
-const SearchBar = ({ onSearch, placeholder = "Search by city or location…" }: Props) => {
-  const [query, setQuery] = useState("");
+const SearchBar = ({
+  onSearch,
+  placeholder = "Search by city or location…",
+  value,
+  initialValue = "",
+  onQueryChange,
+  onDebouncedSearch,
+  debounceMs = 400,
+}: Props) => {
+  const [innerQuery, setInnerQuery] = useState(initialValue);
+  const query = value ?? innerQuery;
+
+  useEffect(() => {
+    if (value === undefined) setInnerQuery(initialValue);
+  }, [initialValue, value]);
+
+  useEffect(() => {
+    if (!onDebouncedSearch) return;
+
+    const timer = window.setTimeout(() => {
+      onDebouncedSearch(query.trim());
+    }, debounceMs);
+
+    return () => window.clearTimeout(timer);
+  }, [debounceMs, onDebouncedSearch, query]);
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -16,7 +44,8 @@ const SearchBar = ({ onSearch, placeholder = "Search by city or location…" }: 
   };
 
   const change = (e: ChangeEvent<HTMLInputElement>) => {
-    setQuery(e.target.value);
+    if (value === undefined) setInnerQuery(e.target.value);
+    onQueryChange?.(e.target.value);
     if (e.target.value === "") onSearch?.("");
   };
 

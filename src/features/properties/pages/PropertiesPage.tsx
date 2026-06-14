@@ -7,6 +7,7 @@ import LoadingSkeleton from "@/features/properties/components/LoadingSkeleton";
 import SearchBar       from "@/features/properties/components/SearchBar";
 
 import { getProperties }  from "@/services/propertyService";
+import { sortPropertiesWithLocalSponsorship } from "@/services/sponsorshipService";
 import { useFavIds }      from "@/hooks/useFavIds";
 import { isPubliclyVisibleProperty } from "@/utils/propertyListing";
 import { mapProperty }    from "@/utils/mapProperty";
@@ -26,7 +27,7 @@ export default function PropertiesPage() {
     setLoading(true);
     getProperties()
       .then((res) => {
-        const mapped = (res.data as any[])
+        const mapped = (res.data as unknown[])
           .map(mapProperty)
           .filter((p: Property) => isPubliclyVisibleProperty(p));
         setAll(mapped);
@@ -44,14 +45,17 @@ export default function PropertiesPage() {
     });
   };
 
-  const displayed = all
-    .filter((p) => p.property_type === type)
-    .filter((p) =>
+  const displayed = sortPropertiesWithLocalSponsorship(
+    all
+      .filter((p) => p.property_type === type)
+      .filter((p) =>
       search
         ? p.propertyName.toLowerCase().includes(search.toLowerCase()) ||
           p.location.toLowerCase().includes(search.toLowerCase())
         : true
-    );
+      ),
+    type === "for_rent" ? "rental" : "general",
+  );
 
   const isRent = type === "for_rent";
   const title  = isRent ? "Rental Properties" : "Properties for Sale";

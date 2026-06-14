@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams }           from "react-router-dom";
 
 import NavBar              from "@/features/properties/components/NavBar";
@@ -10,6 +10,7 @@ import MortgageCalculator  from "@/features/properties/components/PropertyCompon
 import BookingSidebar      from "@/features/properties/components/PropertyComponents/BookingSidebar";
 import OwnerPanel          from "@/features/properties/components/PropertyComponents/OwnerPanel";
 import PropertyLocationMap from "@/features/properties/components/PropertyComponents/PropertyLocationMap";
+import RecommendedPropertiesRow from "@/features/properties/components/RecommendedPropertiesRow";
 
 import { getPropertyById } from "@/services/propertyService";
 import { mapProperty }     from "@/utils/mapProperty";
@@ -23,15 +24,23 @@ const PropertyPage = () => {
   const [loading,  setLoading]   = useState(true);
   const [error,    setError]     = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadProperty = useCallback(async () => {
     if (!id) return;
     setLoading(true);
     setError(null);
-    getPropertyById(id)
-      .then((res) => setProperty(mapProperty(res.data)))
-      .catch(() => setError("Property not found or failed to load."))
-      .finally(() => setLoading(false));
+    try {
+      const res = await getPropertyById(id);
+      setProperty(mapProperty(res.data));
+    } catch {
+      setError("Property not found or failed to load.");
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
+
+  useEffect(() => {
+    loadProperty();
+  }, [loadProperty]);
 
   if (loading) return (
     <>
@@ -73,7 +82,16 @@ const PropertyPage = () => {
               longitude={property.longitude}
               location={property.location}
             />
-            <ReviewsSection     property={property} />
+            <ReviewsSection
+              property={property}
+              onReviewSubmitted={loadProperty}
+            />
+            <RecommendedPropertiesRow
+              seedPropertyId={property.propertyId}
+              excludePropertyId={property.propertyId}
+              title="Similar Properties"
+              description="AI matches with nearby fit and listing details."
+            />
             <MortgageCalculator property={property} />
           </div>
 

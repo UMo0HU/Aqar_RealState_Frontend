@@ -6,6 +6,7 @@ import { useToast }              from "@/context/ToastContext";
 import NavBar                    from "@/features/properties/components/NavBar";
 import type { Notification }     from "@/types";
 import {
+  parseNotificationMetadata,
   resolveNotificationRoute,
   TYPE_ICONS,
 } from "@/utils/notifications";
@@ -30,6 +31,19 @@ export default function NotificationsPage() {
     markAllAsRead,
   } = useNotifications();
   const [markingAll, setMarkingAll] = useState(false);
+
+  const openReview = async (n: Notification, propertyId: string) => {
+    if (!n.viewed) {
+      try {
+        await markAsRead(n.notification_id);
+      } catch {
+        toast.error("Failed to update this notification.");
+        return;
+      }
+    }
+
+    navigate(`/review/${propertyId}`);
+  };
 
   // ── Click: mark read + navigate ───────────────────────────────────────────
   const handleClick = async (n: Notification) => {
@@ -113,6 +127,11 @@ export default function NotificationsPage() {
             {notifications.map((n) => {
               const hasRoute = resolveNotificationRoute(n) !== null;
               const isInteractive = hasRoute || !n.viewed;
+              const metadata = parseNotificationMetadata(n.metadata);
+              const reviewPropertyId = metadata.property_id;
+              const canReview =
+                n.event_type === "LEASE_COMPLETED"
+                && (typeof reviewPropertyId === "string" || typeof reviewPropertyId === "number");
 
               return (
                 <div
@@ -146,7 +165,18 @@ export default function NotificationsPage() {
                       <p className="text-xs text-gray-400">
                         {formatDate(n.created_at)}
                       </p>
-                      {hasRoute && (
+                      {canReview ? (
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            openReview(n, String(reviewPropertyId));
+                          }}
+                          className="text-[11px] text-amber-600 font-semibold hover:text-amber-700 cursor-pointer"
+                        >
+                          Leave a Review →
+                        </button>
+                      ) : hasRoute && (
                         <span className="text-[11px] text-amber-600 font-semibold">
                           View →
                         </span>

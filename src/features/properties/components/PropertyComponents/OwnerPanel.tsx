@@ -8,6 +8,7 @@ import {
   getStoredListingSubscription,
   syncStoredListingSubscriptionWithProperty,
 } from "@/services/listingSubscriptionService";
+import SponsorshipModal from "@/features/subscription/components/SponsorshipModal";
 import { getSaleListingLabel, getSaleListingTone } from "@/utils/propertyListing";
 import { getSaleSubscriptionUiState, hasExpiredSaleListing } from "@/utils/saleSubscriptionState";
 import { useToast } from "@/context/ToastContext";
@@ -33,6 +34,7 @@ export default function OwnerPanel({ property }: Props) {
   const navigate = useNavigate();
   const toast = useToast();
   const [deleting, setDeleting] = useState(false);
+  const [showSponsorshipModal, setShowSponsorshipModal] = useState(false);
 
   const isSale = property.property_type === "for_sale";
   const saleSubscription = isSale
@@ -321,6 +323,15 @@ export default function OwnerPanel({ property }: Props) {
               Review Rent Requests
             </button>
           )}
+          {property.isVerified && (
+            <button
+              type="button"
+              onClick={() => setShowSponsorshipModal(true)}
+              className="w-full border border-amber-300 bg-amber-50 py-3 rounded-full font-bold text-amber-800 hover:bg-amber-100 transition cursor-pointer"
+            >
+              {isSale ? "Sponsor Listing" : "Boost Rental"}
+            </button>
+          )}
           {!isSale && currentRenterId && (
             <>
               <button
@@ -423,6 +434,12 @@ export default function OwnerPanel({ property }: Props) {
           )}
         </div>
       </div>
+      {showSponsorshipModal && (
+        <SponsorshipModal
+          property={property}
+          onClose={() => setShowSponsorshipModal(false)}
+        />
+      )}
     </div>
   );
 }
