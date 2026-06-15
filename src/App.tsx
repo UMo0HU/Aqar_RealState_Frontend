@@ -5,7 +5,7 @@ import { ChatSyncProvider }     from "@/context/ChatSyncProvider";
 import { NotificationsProvider } from "@/context/NotificationsContext";
 import { useAuthGuard }        from "@/hooks/useAuthGuard";
 import ProtectedRoute          from "@/routes/ProtectedRoute";
-import AIChatbot               from "@/features/ai/components/AIChatbot";
+
 
 // ─── Property ─────────────────────────────────────────────────────────────────
 import Home                 from "@/features/properties/pages/HomePage";
@@ -14,6 +14,7 @@ import AddPropertyPage      from "@/features/properties/pages/AddPropertyPage";
 import SearchPropertiesPage from "@/features/properties/pages/SearchPropertiesPage";
 import PropertiesPage       from "@/features/properties/pages/PropertiesPage";
 import ReviewPage           from "@/features/properties/pages/ReviewPage";
+import AIChatPage           from "@/features/ai/pages/AIChatPage";
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 import AuthLayout            from "@/features/auth/AuthLayout";
@@ -63,6 +64,10 @@ function AppContent() {
         <Route path="/buy/property/:id"  element={<PropertyPage />} />
         <Route path="/rent/property/:id" element={<PropertyPage />} />
         <Route path="/review/:propertyId" element={<ProtectedRoute><ReviewPage /></ProtectedRoute>} />
+        <Route 
+          path="/ai-assistant" 
+          element={<AIChatPage />} 
+        />
 
         {/* Auth */}
         <Route path="/auth" element={<AuthLayout />}>
@@ -98,7 +103,6 @@ function AppContent() {
         <Route path="/property/:id/subscription" element={<ProtectedRoute><PropertySubscriptionPage /></ProtectedRoute>} />
       </Routes>
       <RentDueBanner />
-      <AIChatbot />
     </>
   );
 }
