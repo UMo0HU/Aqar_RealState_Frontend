@@ -17,16 +17,12 @@ interface Props {
   onClose: () => void;
 }
 
-const getTier = (property: Property): SponsorshipTier =>
-  property.property_type === "for_rent" ? "rental" : "general";
-
 export default function SponsorshipModal({ property, onClose }: Props) {
   const toast = useToast();
   const [duration, setDuration] = useState<SponsorshipDuration>(1);
   const [starting, setStarting] = useState(false);
 
-  const tier = getTier(property);
-  const isRentalBoost = tier === "rental";
+  const tier: SponsorshipTier = "rental";
   const selectedPlan = SPONSORSHIP_PLANS.find((plan) => plan.duration === duration);
 
   const handleCheckout = async () => {
@@ -66,10 +62,10 @@ export default function SponsorshipModal({ property, onClose }: Props) {
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xs font-bold uppercase tracking-wide text-amber-600">
-              {isRentalBoost ? "Rental Boost" : "General Sponsorship"}
+              Rental Boost
             </p>
             <h2 className="mt-1 text-2xl font-bold text-gray-900">
-              {isRentalBoost ? "Boost Rental Visibility" : "Sponsor Listing"}
+              Boost Rental Visibility
             </h2>
             <p className="mt-1 text-sm text-gray-500">
               {property.propertyName}
@@ -108,10 +104,7 @@ export default function SponsorshipModal({ property, onClose }: Props) {
         </div>
 
         <div className="mt-5 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
-          {isRentalBoost
-            ? "Rental boosts are prioritized for home-page rental visibility."
-            : "General sponsorship promotes sale and standard listing visibility."}
-          {" "}
+          Rental boosts are prioritized for home-page rental visibility.
           Current backend responses do not expose active sponsorship status, so AQAR keeps a local payment record after checkout starts.
         </div>
 

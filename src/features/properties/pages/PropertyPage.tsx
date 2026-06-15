@@ -82,10 +82,13 @@ const PropertyPage = () => {
               longitude={property.longitude}
               location={property.location}
             />
-            <ReviewsSection
-              property={property}
-              onReviewSubmitted={loadProperty}
-            />
+            {property.property_type !== "for_sale" && (
+              <ReviewsSection
+                property={property}
+                onReviewSubmitted={loadProperty}
+                hideForm={true}
+              />
+            )}
             <RecommendedPropertiesRow
               seedPropertyId={property.propertyId}
               excludePropertyId={property.propertyId}

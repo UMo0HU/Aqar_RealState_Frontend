@@ -323,13 +323,13 @@ export default function OwnerPanel({ property }: Props) {
               Review Rent Requests
             </button>
           )}
-          {property.isVerified && (
+          {property.isVerified && !isSale && (
             <button
               type="button"
               onClick={() => setShowSponsorshipModal(true)}
               className="w-full border border-amber-300 bg-amber-50 py-3 rounded-full font-bold text-amber-800 hover:bg-amber-100 transition cursor-pointer"
             >
-              {isSale ? "Sponsor Listing" : "Boost Rental"}
+              Boost Rental
             </button>
           )}
           {!isSale && currentRenterId && (

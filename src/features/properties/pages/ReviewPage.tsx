@@ -70,6 +70,7 @@ export default function ReviewPage() {
             <ReviewsSection
               property={property}
               autoFocusForm
+              hideForm={false}
               onReviewSubmitted={loadProperty}
             />
           )}

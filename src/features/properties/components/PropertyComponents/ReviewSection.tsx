@@ -15,6 +15,7 @@ import StarRating from "./StarRating";
 interface Props {
   property: Property;
   autoFocusForm?: boolean;
+  hideForm?: boolean;
   onReviewSubmitted?: () => Promise<void> | void;
 }
 
@@ -26,6 +27,7 @@ const reviewerName = (review: ReviewRecord) =>
 export default function ReviewsSection({
   property,
   autoFocusForm = false,
+  hideForm = false,
   onReviewSubmitted,
 }: Props) {
   const { isAuthenticated } = useAuth();
@@ -120,6 +122,7 @@ export default function ReviewsSection({
         </div>
       </div>
 
+      {!hideForm && (
       <form onSubmit={handleSubmit} className="mb-6 rounded-2xl border border-gray-200 bg-gray-50 p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -153,6 +156,7 @@ export default function ReviewsSection({
           </button>
         </div>
       </form>
+      )}
 
       {loading && (
         <div className="flex justify-center py-8">

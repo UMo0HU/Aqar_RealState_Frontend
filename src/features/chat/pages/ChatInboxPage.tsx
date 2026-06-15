@@ -3,6 +3,7 @@ import { useNavigate }                 from "react-router-dom";
 
 import NavBar                          from "@/features/properties/components/NavBar";
 import { useAuth }                     from "@/context/AuthContext";
+import { useChatSync }                 from "@/context/ChatSyncProvider";
 import { getSocket }                   from "@/api/socket";
 import { BASE_URL }                    from "@/api/axiosInstance";
 import {
@@ -43,6 +44,7 @@ const timeAgo = (iso: string | null): string => {
 export default function ChatInboxPage() {
   const navigate = useNavigate();
   const { userInfo } = useAuth();
+  const { refreshInboxCount } = useChatSync();
 
   const [chats,   setChats]   = useState<InboxChat[]>([]);
   const [loading, setLoading] = useState(true);
@@ -153,6 +155,8 @@ export default function ChatInboxPage() {
         propertyImg:  parseImages(chat.property_images)[0] ?? null,
       },
     });
+
+    refreshInboxCount();
   };
 
   // ── Render ────────────────────────────────────────────────────────────────

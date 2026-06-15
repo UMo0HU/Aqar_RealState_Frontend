@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useParams }      from "react-router-dom";
 
 import { getSocket }                                from "@/api/socket";
 import { useAuth }                                  from "@/context/AuthContext";
+import { useChatSync }                              from "@/context/ChatSyncProvider";
 import { useToast }                                 from "@/context/ToastContext";
 import NavBar                                       from "@/features/properties/components/NavBar";
 import {
@@ -118,6 +119,7 @@ export default function ChatWindowPage() {
   const location     = useLocation();
   const navigate     = useNavigate();
   const { userInfo } = useAuth();
+  const { refreshInboxCount } = useChatSync();
   const toast        = useToast();
   const userId       = userInfo?.id ?? "";
 
@@ -167,12 +169,13 @@ export default function ChatWindowPage() {
       const res = await getChatHistory(chat_id);
       setMessages(res.data.data ?? []);
       markChatAsRead(chat_id).catch(() => {});
+      refreshInboxCount();
     } catch {
       setError(true);
     } finally {
       setLoading(false);
     }
-  }, [chat_id]);
+  }, [chat_id, refreshInboxCount]);
 
   // ── Load history ──────────────────────────────────────────────────────────
   useEffect(() => {

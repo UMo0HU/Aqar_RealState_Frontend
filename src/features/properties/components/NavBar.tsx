@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate }           from "react-router-dom";
 
 import { useAuth }               from "@/context/AuthContext";
+import { useChatSync }           from "@/context/ChatSyncProvider";
 import { useNotifications }      from "@/context/NotificationsContext";
 import { logout as logoutAPI }   from "@/services/authService";
 
@@ -37,6 +38,7 @@ const NavIconButton = ({
 const NavBar = () => {
   const { userInfo, isAuthenticated, logout } = useAuth();
   const { unreadCount } = useNotifications();
+  const { unreadChatCount } = useChatSync();
   const navigate = useNavigate();
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -84,7 +86,7 @@ const NavBar = () => {
         ) : (
           <>
             {/* Chat icon — links to /chat inbox */}
-            <NavIconButton title="Messages" onClick={() => navigate("/chat")}>
+            <NavIconButton title="Messages" badgeCount={unreadChatCount} onClick={() => navigate("/chat")}>
               <ChatIcon />
             </NavIconButton>
 
