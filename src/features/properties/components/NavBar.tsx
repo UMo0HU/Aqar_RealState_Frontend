@@ -6,7 +6,7 @@ import { useChatSync }           from "@/context/ChatSyncProvider";
 import { useNotifications }      from "@/context/NotificationsContext";
 import { logout as logoutAPI }   from "@/services/authService";
 
-import { BellIcon, ChatIcon, ProfileIcon, SignOutIcon } from "@/utils/Icons";
+import { BellIcon, ChatIcon, ProfileIcon, SignOutIcon, WalletIcon } from "@/utils/Icons";
 
 // ─── Small icon button with optional numeric badge ────────────────────────────
 const NavIconButton = ({
@@ -97,6 +97,11 @@ const NavBar = () => {
               onClick={() => { navigate("/notifications"); }}
             >
               <BellIcon />
+            </NavIconButton>
+
+            {/* Wallet — signed‑in only */}
+            <NavIconButton title="Wallet" onClick={() => navigate("/wallet")}>
+              <WalletIcon />
             </NavIconButton>
 
             {/* Avatar + dropdown */}
