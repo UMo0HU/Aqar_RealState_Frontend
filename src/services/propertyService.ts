@@ -4,7 +4,7 @@ import type { PropertyFormData } from "@/types";
 export const resolveImageUrl = (path: string): string => {
   if (!path) return "";
   if (path.startsWith("http")) return path;
-  return `${BASE_URL}/${path.replace(/^\//, "")}`;
+  return `${BASE_URL}/${path.replace(/^\//, "").replace(/\\/g, "/")}`;
 };
 
 export const addProperty = async (data: PropertyFormData) => {

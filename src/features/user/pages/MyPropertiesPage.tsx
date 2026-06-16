@@ -13,6 +13,7 @@ import {
   getStoredListingSubscription,
   syncStoredListingSubscriptionWithProperty,
 } from "@/services/listingSubscriptionService";
+import { isLocallySponsoredProperty } from "@/services/sponsorshipService";
 import { mapProperty }               from "@/utils/mapProperty";
 import { useToast }                  from "@/context/ToastContext";
 import type { Property }             from "@/types";
@@ -213,13 +214,13 @@ export default function MyPropertiesPage() {
                       Selling Plan
                     </button>
                   )}
-                  {p.isVerified && (
+                  {p.isVerified && p.property_type === "for_rent" && !isLocallySponsoredProperty(p.propertyId) && (
                     <button
                       type="button"
                       onClick={() => setBoostProperty(p)}
                       className="text-xs px-3.5 py-1.5 border border-amber-300 bg-amber-50 text-amber-800 rounded-lg font-bold hover:bg-amber-100 transition"
                     >
-                      {p.property_type === "for_rent" ? "Boost" : "Sponsor"}
+                      Boost
                     </button>
                   )}
                   <button

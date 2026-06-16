@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { DayPicker, type DateRange } from "react-day-picker";
-import { format, addMonths, differenceInCalendarDays } from "date-fns";
+import { format, addMonths, addDays, differenceInCalendarDays, eachDayOfInterval, isSameDay } from "date-fns";
 
 export interface DateSelection {
   checkIn:     string;
@@ -11,8 +11,10 @@ export interface DateSelection {
 }
 
 interface Props {
-  mode:     "DAY" | "MONTH";
-  onChange: (selection: DateSelection | null) => void;
+  mode:           "DAY" | "MONTH";
+  onChange:       (selection: DateSelection | null) => void;
+  disabledDates?: Date[];
+  onRangeError?:  (msg: string) => void;
 }
 
 /*
@@ -40,14 +42,26 @@ const rdpTheme: React.CSSProperties = {
   "--rdp-today-color":             "#D97706",
 } as React.CSSProperties;
 
-export default function DatePicker({ mode, onChange }: Props) {
+export default function DatePicker({ mode, onChange, disabledDates = [], onRangeError }: Props) {
   const [dayRange,    setDayRange]    = useState<DateRange | undefined>();
   const [checkInDate, setCheckInDate] = useState<Date | undefined>();
   const [numMonths,   setNumMonths]   = useState<number>(1);
 
+  const rangeHasDisabledDate = (from: Date, to: Date): boolean => {
+    if (disabledDates.length === 0) return false;
+    const days = eachDayOfInterval({ start: from, end: to });
+    return days.some((day) => disabledDates.some((d) => isSameDay(day, d)));
+  };
+
   const emitDay = (r: DateRange | undefined) => {
     setDayRange(r);
     if (!r?.from || !r?.to) { onChange(null); return; }
+    if (rangeHasDisabledDate(r.from, r.to)) {
+      setDayRange(undefined);
+      onChange(null);
+      onRangeError?.("Your selected range includes unavailable dates.");
+      return;
+    }
     const days = differenceInCalendarDays(r.to, r.from);
     if (days <= 0) { onChange(null); return; }
     onChange({
@@ -81,7 +95,7 @@ export default function DatePicker({ mode, onChange }: Props) {
               selected={dayRange}
               onSelect={emitDay}
               numberOfMonths={1}
-              disabled={{ before: new Date() }}
+              disabled={[{ before: addDays(new Date(), 1) }, ...disabledDates]}
             />
           </div>
         </div>
@@ -126,9 +140,16 @@ export default function DatePicker({ mode, onChange }: Props) {
             <DayPicker
               mode="single"
               selected={checkInDate}
-              onSelect={(d) => { setCheckInDate(d ?? undefined); emitMonth(d ?? undefined, numMonths); }}
+              onSelect={(d) => {
+                if (d && disabledDates.some((dd) => isSameDay(d, dd))) {
+                  onRangeError?.("This date is unavailable.");
+                  return;
+                }
+                setCheckInDate(d ?? undefined);
+                emitMonth(d ?? undefined, numMonths);
+              }}
               numberOfMonths={1}
-              disabled={{ before: new Date() }}
+              disabled={[{ before: addDays(new Date(), 1) }, ...disabledDates]}
             />
           </div>
         </div>

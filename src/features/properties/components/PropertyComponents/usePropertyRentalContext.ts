@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
+import { eachDayOfInterval } from "date-fns";
 
 import { getLeasesAsOwner, getLeasesAsRenter } from "@/services/leaseService";
 import { getRentRequests } from "@/services/rentRequestService";
@@ -29,6 +30,11 @@ const LEASE_PRIORITY: Record<Lease["status"], number> = {
   UPCOMING: 2,
   COMPLETED: 3,
   CANCELLED: 4,
+};
+
+const parseDate = (dateStr: string): Date => {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, m - 1, d);
 };
 
 const compareRequests = (left: RentRequest, right: RentRequest) => {
@@ -127,6 +133,33 @@ export function usePropertyRentalContext({ propertyId, enabled, role }: Options)
     [leases, propertyId],
   );
 
+  const disabledDates = useMemo(() => {
+    const result: Date[] = [];
+
+    const addRange = (checkIn: string, checkOut: string) => {
+      try {
+        const days = eachDayOfInterval({ start: parseDate(checkIn), end: parseDate(checkOut) });
+        result.push(...days);
+      } catch {
+        /* skip invalid date strings */
+      }
+    };
+
+    for (const lease of propertyLeases) {
+      if (lease.status !== "CANCELLED" && lease.status !== "COMPLETED") {
+        addRange(lease.check_in_date, lease.check_out_date);
+      }
+    }
+
+    for (const req of propertyReceivedRequests) {
+      if (["PENDING", "ACCEPTED", "PAYMENT_PENDING", "PAID"].includes(req.request_state)) {
+        addRange(req.check_in_date, req.check_out_date);
+      }
+    }
+
+    return result;
+  }, [propertyLeases, propertyReceivedRequests]);
+
   return {
     loading,
     error,
@@ -137,5 +170,6 @@ export function usePropertyRentalContext({ propertyId, enabled, role }: Options)
     relevantReceivedRequest: pickRelevantRentRequest(propertyReceivedRequests),
     propertyLeases,
     relevantLease: pickRelevantLease(propertyLeases),
+    disabledDates,
   };
 }

@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { eachDayOfInterval, isSameDay } from "date-fns";
 
 import DatePicker, { type DateSelection } from "@/features/properties/components/PropertyComponents/DataPicker";
 import { useAuth } from "@/context/AuthContext";
@@ -67,6 +68,7 @@ export default function BookingSidebar({ property }: Props) {
     reload: reloadRentalContext,
     relevantSentRequest,
     relevantLease,
+    disabledDates,
   } = usePropertyRentalContext({
     propertyId: property.propertyId,
     enabled: isAuthenticated && !isSale,
@@ -163,6 +165,24 @@ export default function BookingSidebar({ property }: Props) {
 
     try {
       setBusyAction("create");
+
+      await reloadRentalContext();
+
+      const freshFrom = new Date(selection.checkIn + "T00:00:00");
+      const freshTo   = new Date(selection.checkOut + "T00:00:00");
+      const freshRange = eachDayOfInterval({ start: freshFrom, end: freshTo });
+      const hasOverlap = freshRange.some((day) =>
+        disabledDates.some((d) => isSameDay(day, d)),
+      );
+
+      if (hasOverlap) {
+        toast.error("These dates were just booked by someone else. Please select new dates.");
+        setSelection(null);
+        setShowPicker(false);
+        setBusyAction(null);
+        return;
+      }
+
       await createRentRequest({
         property_id: property.propertyId,
         check_in_date: selection.checkIn,
@@ -498,6 +518,8 @@ export default function BookingSidebar({ property }: Props) {
                 <DatePicker
                   mode={isMonthly ? "MONTH" : "DAY"}
                   onChange={setSelection}
+                  disabledDates={disabledDates}
+                  onRangeError={(msg) => toast.error(msg)}
                 />
               </div>
             )}

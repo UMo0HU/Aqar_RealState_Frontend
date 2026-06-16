@@ -110,6 +110,21 @@ export default function EditPropertyPage() {
   const handleSaveInfo = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id) return;
+    if (
+      form.propertyName === property?.propertyName &&
+      form.propertyDesc === property?.propertyDesc &&
+      form.location === property?.location &&
+      Number(form.priceValue) === property?.priceValue &&
+      form.size === property?.size &&
+      Number(form.bedroomsNumber) === property?.bedroomsNumber &&
+      (form.is_furnished ? Number(form.bedsNumber) : 0) === (form.is_furnished ? Number(property?.bedsNumber) : 0) &&
+      Number(form.bathroomsNumber) === property?.bathroomsNumber &&
+      form.latitude === property?.latitude &&
+      form.longitude === property?.longitude
+    ) {
+      toast.error("No changes detected.");
+      return;
+    }
     try {
       setSaving(true);
       await editPropertyInfo(id, {

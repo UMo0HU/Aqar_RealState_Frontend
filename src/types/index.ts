@@ -29,6 +29,7 @@ export interface Property {
   isAvailable:      boolean;
   isVerified:       boolean;
   is_furnished:     boolean;
+  isSponsored?:     boolean;  // backend sets is_sponsored after sponsorship payment webhook
   property_type:    property_type;
   listingStatus:    PropertyListingStatus;
   listingExpiry?:   string | null;

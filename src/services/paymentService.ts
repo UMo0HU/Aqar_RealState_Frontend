@@ -177,3 +177,17 @@ export const loadPendingInvoicePayment = (): PendingInvoicePayment | null => {
 export const clearPendingInvoicePayment = () => {
   sessionStorage.removeItem(PENDING_INVOICE_PAYMENT_KEY);
 };
+
+// ─── Wallet / Balance ──────────────────────────────────────────────────────────
+
+export interface BalanceResponse {
+  success: boolean;
+  balance: string;
+  currency: string;
+}
+
+export const getBalance = () =>
+  axios.get<BalanceResponse>("/api/balance");
+
+export const requestWithdrawal = (amount: number, method: string, receiverData: string) =>
+  axios.post("/api/payment/request-withdrawal", { amount, method, receiverData });

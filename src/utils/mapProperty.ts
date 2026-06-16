@@ -25,6 +25,7 @@ export const mapProperty = (prop: any): Property => ({
   isAvailable:       !!prop.is_available,
   isVerified:        !!prop.is_verified,
   is_furnished:      !!prop.is_furnished,
+  isSponsored:       !!prop.is_sponsored,
   property_type:     prop.property_type,
   listingStatus:     prop.listing_status ?? "inactive",
   listingExpiry:     prop.listing_expiry ?? null,

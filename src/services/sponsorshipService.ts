@@ -67,8 +67,11 @@ export const sortPropertiesWithLocalSponsorship = (
   const standard: Property[] = [];
 
   properties.forEach((property) => {
+    const isBackendSponsored = property.isSponsored === true;
     const record = records[String(property.propertyId)];
-    if (record && (!tier || record.tier === tier)) {
+    const isLocallySponsored = record && (!tier || record.tier === tier);
+
+    if (isBackendSponsored || isLocallySponsored) {
       sponsored.push(property);
       return;
     }

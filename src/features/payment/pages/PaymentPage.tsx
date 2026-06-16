@@ -41,23 +41,30 @@ export default function PaymentPage() {
   const handlePay = async () => {
     if (!id || !request) return;
 
-    if (request.request_state === "PAID") {
-      navigate(`/payment/success?request_id=${request.request_id}`);
-      return;
-    }
-
-    if (!["ACCEPTED", "PAYMENT_PENDING"].includes(request.request_state)) {
-      toast.error("This request is not ready for payment yet.");
-      return;
-    }
-
     try {
       setPaying(true);
-      savePendingRentPayment(request.request_id);
+
+      const fresh = await getRentRequestById(id);
+      const freshRequest = fresh.data as RentRequest;
+
+      if (freshRequest.request_state === "PAID") {
+        navigate(`/payment/success?request_id=${freshRequest.request_id}`);
+        return;
+      }
+
+      if (!["ACCEPTED", "PAYMENT_PENDING"].includes(freshRequest.request_state)) {
+        toast.error("This request is no longer available for payment.");
+        setRequest(freshRequest);
+        return;
+      }
+
+      setRequest(freshRequest);
+
+      savePendingRentPayment(freshRequest.request_id);
 
       const res = await getPaymentLink(
-        request.request_id,
-        buildRentPaymentSuccessUrl(request.request_id),
+        freshRequest.request_id,
+        buildRentPaymentSuccessUrl(freshRequest.request_id),
       );
 
       const paymentUrl = res.data?.url;
@@ -69,6 +76,11 @@ export default function PaymentPage() {
       window.location.assign(paymentUrl);
     } catch (err) {
       clearPendingRentPayment();
+      if (axios.isAxiosError(err) && err.response?.status === 404) {
+        toast.error("This request no longer exists.");
+        navigate("/rent-requests");
+        return;
+      }
       toast.error(
         axios.isAxiosError(err)
           ? (err.response?.data?.msg ?? err.message ?? "Failed to start payment.")

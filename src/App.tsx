@@ -45,6 +45,7 @@ import RentDueBanner from "@/features/payment/components/RentDueBanner";
 import PropertySubscriptionPage from "@/features/subscription/pages/PropertySubscriptionPage";
 import SubscriptionPaymentStatusPage from "@/features/subscription/pages/SubscriptionPaymentStatusPage";
 import SponsorshipPaymentStatusPage from "@/features/subscription/pages/SponsorshipPaymentStatusPage";
+import WalletPage from "@/features/wallet/pages/WalletPage";
 
 // ─── Chat ──────────────────────────────────────────────────────────────────
 import ChatInboxPage  from "@/features/chat/pages/ChatInboxPage";
@@ -85,6 +86,7 @@ function AppContent() {
         <Route path="/my-properties"         element={<ProtectedRoute><MyPropertiesPage /></ProtectedRoute>} />
         <Route path="/property/:id/edit"     element={<ProtectedRoute><EditPropertyPage /></ProtectedRoute>} />
         <Route path="/favorites"             element={<ProtectedRoute><FavoritesPage /></ProtectedRoute>} />
+        <Route path="/wallet"                element={<ProtectedRoute><WalletPage /></ProtectedRoute>} />
         <Route path="/notifications"         element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
         <Route path="/rent-requests"         element={<ProtectedRoute><RentRequestsListPage /></ProtectedRoute>} />
         <Route path="/leases"                element={<ProtectedRoute><LeasesPage /></ProtectedRoute>} />

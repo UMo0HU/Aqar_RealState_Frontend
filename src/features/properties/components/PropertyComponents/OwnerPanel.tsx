@@ -9,6 +9,7 @@ import {
   syncStoredListingSubscriptionWithProperty,
 } from "@/services/listingSubscriptionService";
 import SponsorshipModal from "@/features/subscription/components/SponsorshipModal";
+import { isLocallySponsoredProperty } from "@/services/sponsorshipService";
 import { getSaleListingLabel, getSaleListingTone } from "@/utils/propertyListing";
 import { getSaleSubscriptionUiState, hasExpiredSaleListing } from "@/utils/saleSubscriptionState";
 import { useToast } from "@/context/ToastContext";
@@ -323,7 +324,7 @@ export default function OwnerPanel({ property }: Props) {
               Review Rent Requests
             </button>
           )}
-          {property.isVerified && !isSale && (
+          {property.isVerified && !isSale && !isLocallySponsoredProperty(property.propertyId) && (
             <button
               type="button"
               onClick={() => setShowSponsorshipModal(true)}

@@ -18,7 +18,7 @@ import {
 const resolveImg = (raw: string | null | undefined): string => {
   if (!raw) return "";
   if (raw.startsWith("http")) return raw;
-  return `${BASE_URL}/${raw.replace(/^\//, "")}`;
+  return `${BASE_URL}/${raw.replace(/^\//, "").replace(/\\/g, "/")}`;
 };
 
 const parseImages = (raw: string[] | string | null | undefined): string[] => {
