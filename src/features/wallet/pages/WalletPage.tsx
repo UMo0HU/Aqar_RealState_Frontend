@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 
 import NavBar from "@/features/properties/components/NavBar";
 import { getBalance, requestWithdrawal } from "@/services/paymentService";
