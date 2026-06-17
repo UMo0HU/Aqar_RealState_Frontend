@@ -20,8 +20,10 @@ const REQUEST_PRIORITY: Record<RentRequestState, number> = {
   ACCEPTED: 2,
   PENDING: 3,
   REFUNDED: 4,
-  REJECTED: 5,
-  CANCELLED: 6,
+  REFUND_REQUESTED: 5,
+  REFUND_DENIED: 6,
+  REJECTED: 7,
+  CANCELLED: 8,
 };
 
 const LEASE_PRIORITY: Record<Lease["status"], number> = {
