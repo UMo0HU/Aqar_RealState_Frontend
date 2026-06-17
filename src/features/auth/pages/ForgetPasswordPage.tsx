@@ -27,12 +27,15 @@ export default function ForgetPasswordPage() {
             }
         catch (error) {
             if(axios.isAxiosError(error)) {
-                const errorMsg = error.response?.data.msg;
+                const errorMsg = error.response?.data?.msg;
                 if(errorMsg === "Email is required") {
                     setInputErrors(prev => ({...prev, email_msg : `${errorMsg}.`}));
                 }
                 else if(errorMsg === "User not found") {
                     setInputErrors(prev => ({...prev, email_msg : `Email not found.`}));
+                }
+                else if(errorMsg) {
+                    setInputErrors(prev => ({...prev, email_msg : errorMsg}));
                 }
             }
             else {
