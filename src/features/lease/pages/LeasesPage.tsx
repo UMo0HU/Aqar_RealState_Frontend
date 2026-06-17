@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import NavBar from "@/features/properties/components/NavBar";
 import { getLeasesAsRenter, getLeasesAsOwner } from "@/services/leaseService";
@@ -15,6 +16,7 @@ const STATUS_STYLES: Record<string, string> = {
 
 export default function LeasesPage() {
   const toast = useToast();
+  const navigate = useNavigate();
 
   const [renterLeases, setRenterLeases] = useState<Lease[]>([]);
   const [ownerLeases,  setOwnerLeases]  = useState<Lease[]>([]);
@@ -36,7 +38,10 @@ export default function LeasesPage() {
   const fmt = (iso: string) => iso?.slice(0, 10) ?? "—";
 
   const LeaseCard = ({ lease }: { lease: Lease }) => (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-3 hover:shadow-md transition">
+    <div
+      onClick={() => navigate(`/leases/${lease.lease_id}`)}
+      className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-3 hover:shadow-md hover:border-gray-300 transition cursor-pointer"
+    >
 
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>

@@ -4,10 +4,8 @@ import { useToast } from "@/context/ToastContext";
 import {
   buildSponsorshipPaymentSuccessUrl,
   createSponsorshipCheckout,
-  savePendingSponsorship,
   SPONSORSHIP_PLANS,
   type SponsorshipDuration,
-  type SponsorshipTier,
 } from "@/services/sponsorshipService";
 import type { Property } from "@/types";
 import { getApiErrorMessage } from "@/utils/apiError";
@@ -22,7 +20,6 @@ export default function SponsorshipModal({ property, onClose }: Props) {
   const [duration, setDuration] = useState<SponsorshipDuration>(1);
   const [starting, setStarting] = useState(false);
 
-  const tier: SponsorshipTier = "rental";
   const selectedPlan = SPONSORSHIP_PLANS.find((plan) => plan.duration === duration);
 
   const handleCheckout = async () => {
@@ -44,11 +41,6 @@ export default function SponsorshipModal({ property, onClose }: Props) {
         throw new Error("Missing sponsorship checkout URL");
       }
 
-      savePendingSponsorship({
-        propertyId: property.propertyId,
-        duration,
-        tier,
-      });
       window.location.assign(checkoutUrl);
     } catch (error) {
       toast.error(getApiErrorMessage(error, "Could not start sponsorship payment."));
@@ -105,7 +97,7 @@ export default function SponsorshipModal({ property, onClose }: Props) {
 
         <div className="mt-5 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
           Rental boosts are prioritized for home-page rental visibility.
-          Current backend responses do not expose active sponsorship status, so AQAR keeps a local payment record after checkout starts.
+          The backend updates sponsorship status automatically via webhook.
         </div>
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

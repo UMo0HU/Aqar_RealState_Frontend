@@ -34,8 +34,12 @@ import NotificationsPage from "@/features/user/pages/NotificationsPage";
 // ─── Rent Request ─────────────────────────────────────────────────────────────
 import RentRequestsListPage from "@/features/rentRequest/pages/RentRequestsListPage";
 
+// ─── Purchase Request ─────────────────────────────────────────────────────────
+import PurchaseRequestsListPage from "@/features/purchaseRequest/pages/PurchaseRequestsListPage";
+
 // ─── Lease ────────────────────────────────────────────────────────────────────
 import LeasesPage from "@/features/lease/pages/LeasesPage";
+import LeaseDetailPage from "@/features/lease/pages/LeaseDetailPage";
 
 // ─── Payment ──────────────────────────────────────────────────────────────────
 import PaymentPage        from "@/features/payment/pages/PaymentPage";
@@ -46,6 +50,7 @@ import PropertySubscriptionPage from "@/features/subscription/pages/PropertySubs
 import SubscriptionPaymentStatusPage from "@/features/subscription/pages/SubscriptionPaymentStatusPage";
 import SponsorshipPaymentStatusPage from "@/features/subscription/pages/SponsorshipPaymentStatusPage";
 import WalletPage from "@/features/wallet/pages/WalletPage";
+import InvoicesPage from "@/features/invoices/pages/InvoicesPage";
 
 // ─── Chat ──────────────────────────────────────────────────────────────────
 import ChatInboxPage  from "@/features/chat/pages/ChatInboxPage";
@@ -87,9 +92,12 @@ function AppContent() {
         <Route path="/property/:id/edit"     element={<ProtectedRoute><EditPropertyPage /></ProtectedRoute>} />
         <Route path="/favorites"             element={<ProtectedRoute><FavoritesPage /></ProtectedRoute>} />
         <Route path="/wallet"                element={<ProtectedRoute><WalletPage /></ProtectedRoute>} />
+        <Route path="/invoices"             element={<ProtectedRoute><InvoicesPage /></ProtectedRoute>} />
         <Route path="/notifications"         element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
         <Route path="/rent-requests"         element={<ProtectedRoute><RentRequestsListPage /></ProtectedRoute>} />
+        <Route path="/purchase-requests"    element={<ProtectedRoute><PurchaseRequestsListPage /></ProtectedRoute>} />
         <Route path="/leases"                element={<ProtectedRoute><LeasesPage /></ProtectedRoute>} />
+        <Route path="/leases/:leaseId"      element={<ProtectedRoute><LeaseDetailPage /></ProtectedRoute>} />
         
         {/* Chat — protected */}
         <Route path="/chat"           element={<ProtectedRoute><ChatInboxPage  /></ProtectedRoute>} />

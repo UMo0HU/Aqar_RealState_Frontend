@@ -74,7 +74,9 @@ export type RentRequestState =
   | "CANCELLED"
   | "PAYMENT_PENDING"
   | "PAID"
-  | "REFUNDED";
+  | "REFUNDED"
+  | "REFUND_REQUESTED"
+  | "REFUND_DENIED";
 
 export interface RentRequest {
   request_id:     string;
@@ -91,6 +93,43 @@ export interface RentRequest {
   perspective?:   "SENT" | "RECEIVED";
 }
 
+// ─── Invoice ───────────────────────────────────────────────────────────────────
+export type InvoiceStatus = "UNPAID" | "PAID" | "OVERDUE" | "VOID";
+
+export interface Invoice {
+  invoice_id:       string;
+  lease_id:         string;
+  renter_id:        string;
+  owner_id:         string;
+  amount:           number;
+  due_date:         string;
+  status:           InvoiceStatus;
+  kashier_order_id: string | null;
+  paid_at:          string | null;
+  created_at:       string;
+  property_id:      number;
+  property_name:    string;
+  location:         string;
+}
+
+export interface InvoiceStats {
+  asRenter: {
+    total_invoices:   number;
+    unpaid_count:     number;
+    overdue_count:    number;
+    paid_count:       number;
+    total_due:        number;
+    next_due_date:    string | null;
+  };
+  asOwner: {
+    total_invoices:     number;
+    pending_count:      number;
+    paid_count:         number;
+    expected_income:    number;
+    delinquent_tenants: number;
+  };
+}
+
 // ─── Lease ────────────────────────────────────────────────────────────────────
 export interface Lease {
   lease_id:          string;
@@ -103,6 +142,31 @@ export interface Lease {
   check_in_date:     string;
   check_out_date:    string;
   next_billing_date: string | null;
+  // Joined fields (available on detail endpoint)
+  property_name?:    string;
+  location?:         string;
+  images?:           string;
+  price_value?:      number;
+}
+
+// ─── Purchase Request ─────────────────────────────────────────────────────────
+export type PurchaseRequestStatus = "PENDING" | "ACCEPTED" | "REJECTED" | "CANCELLED";
+
+export interface PurchaseRequest {
+  request_id:        number;
+  property_id:       number;
+  buyer_id:          string;
+  owner_id:          string;
+  status:            PurchaseRequestStatus;
+  message:           string | null;
+  contact_unlocked:  boolean;
+  created_at:        string;
+  property_name?:    string;
+  listing_status?:   string;
+  buyer_first_name?: string;
+  buyer_second_name?: string;
+  buyer_email?:      string;
+  images?:           string;
 }
 
 // ─── Notification ─────────────────────────────────────────────────────────────

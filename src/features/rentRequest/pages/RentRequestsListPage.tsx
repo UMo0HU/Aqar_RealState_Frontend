@@ -10,17 +10,20 @@ import {
   rejectRentRequest,
   cancelRentRequest,
 } from "@/services/rentRequestService";
+import { requestRefund } from "@/services/paymentService";
 import { useToast }       from "@/context/ToastContext";
 import type { RentRequest } from "@/types";
 
 const STATE_STYLES: Record<string, string> = {
-  PENDING:   "bg-yellow-100 text-yellow-700",
-  ACCEPTED:  "bg-blue-100 text-blue-700",
-  PAYMENT_PENDING: "bg-blue-100 text-blue-700",
-  REJECTED:  "bg-red-100 text-red-600",
-  CANCELLED: "bg-gray-100 text-gray-500",
-  PAID:      "bg-green-100 text-green-700",
-  REFUNDED:  "bg-slate-100 text-slate-600",
+  PENDING:          "bg-yellow-100 text-yellow-700",
+  ACCEPTED:         "bg-blue-100 text-blue-700",
+  PAYMENT_PENDING:  "bg-blue-100 text-blue-700",
+  REJECTED:         "bg-red-100 text-red-600",
+  CANCELLED:        "bg-gray-100 text-gray-500",
+  PAID:             "bg-green-100 text-green-700",
+  REFUNDED:         "bg-slate-100 text-slate-600",
+  REFUND_REQUESTED: "bg-indigo-100 text-indigo-700",
+  REFUND_DENIED:    "bg-orange-100 text-orange-700",
 };
 
 export default function RentRequestsListPage() {
@@ -33,6 +36,9 @@ export default function RentRequestsListPage() {
   const [error,    setError]    = useState<string | null>(null);
   const [tab,      setTab]      = useState<"sent" | "received">("sent");
   const [actionId, setActionId] = useState<string | null>(null);
+  const [actionType, setActionType] = useState<string | null>(null);
+  const [refunding, setRefunding] = useState<string | null>(null);
+  const [refundReason, setRefundReason] = useState("");
 
   const load = () => {
     setLoading(true);
@@ -63,6 +69,7 @@ export default function RentRequestsListPage() {
     if (!window.confirm(`${label}?`)) return;
     try {
       setActionId(id);
+      setActionType(action);
       if (action === "accept") await acceptRentRequest(id);
       if (action === "reject") await rejectRentRequest(id);
       if (action === "cancel") await cancelRentRequest(id);
@@ -72,6 +79,7 @@ export default function RentRequestsListPage() {
       toast.error(axios.isAxiosError(err) ? (err.response?.data?.msg ?? "Action failed.") : "Action failed.");
     } finally {
       setActionId(null);
+      setActionType(null);
     }
   };
 
@@ -150,7 +158,7 @@ export default function RentRequestsListPage() {
               disabled={actionId === req.request_id}
               className="text-xs px-4 py-1.5 bg-green-600 text-white rounded-lg font-bold hover:opacity-90 transition disabled:opacity-50"
             >
-              Accept
+              {actionId === req.request_id && actionType === "accept" ? "Accepting..." : "Accept"}
             </button>
             <button
               onClick={() => doAction(req.request_id, "reject", "Reject this request")}
@@ -193,12 +201,20 @@ export default function RentRequestsListPage() {
         )}
 
         {tab === "sent" && req.request_state === "PAID" && (
-          <button
-            onClick={() => navigate(`/payment/success?request_id=${req.request_id}`)}
-            className="text-xs px-4 py-1.5 bg-dark-knight text-white rounded-lg font-bold hover:opacity-90 transition cursor-pointer"
-          >
-            View Confirmation
-          </button>
+          <>
+            <button
+              onClick={() => setRefunding(req.request_id)}
+              className="text-xs px-4 py-1.5 bg-indigo-600 text-white rounded-lg font-bold hover:opacity-90 transition cursor-pointer"
+            >
+              Request Refund
+            </button>
+            <button
+              onClick={() => navigate(`/payment/success?request_id=${req.request_id}`)}
+              className="text-xs px-4 py-1.5 bg-dark-knight text-white rounded-lg font-bold hover:opacity-90 transition cursor-pointer"
+            >
+              View Confirmation
+            </button>
+          </>
         )}
 
         {tab === "sent" && (
@@ -276,6 +292,47 @@ export default function RentRequestsListPage() {
 
         </div>
       </div>
+
+      {/* Refund Modal */}
+      {refunding && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md space-y-4">
+            <h3 className="text-lg font-bold text-gray-900">Request Refund</h3>
+            <p className="text-sm text-gray-500">Provide a reason for the refund request (optional).</p>
+            <textarea
+              value={refundReason}
+              onChange={(e) => setRefundReason(e.target.value)}
+              placeholder="Reason for refund…"
+              rows={3}
+              className="w-full border border-gray-200 rounded-xl p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-dark-knight"
+            />
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => { setRefunding(null); setRefundReason(""); }}
+                className="px-4 py-2 text-sm font-semibold border border-gray-300 rounded-xl hover:bg-gray-50 transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    await requestRefund(refunding, refundReason || undefined);
+                    toast.success("Refund request submitted.");
+                    setRefunding(null);
+                    setRefundReason("");
+                    load();
+                  } catch (err) {
+                    toast.error(axios.isAxiosError(err) ? (err.response?.data?.msg ?? "Request failed.") : "Request failed.");
+                  }
+                }}
+                className="px-4 py-2 text-sm font-bold bg-indigo-600 text-white rounded-xl hover:opacity-90 transition cursor-pointer"
+              >
+                Submit Request
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

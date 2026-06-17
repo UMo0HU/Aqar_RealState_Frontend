@@ -54,7 +54,6 @@ export default function PropertiesPage() {
           p.location.toLowerCase().includes(search.toLowerCase())
         : true
       ),
-    type === "for_rent" ? "rental" : "general",
   );
 
   const isRent = type === "for_rent";

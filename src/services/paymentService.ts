@@ -189,5 +189,9 @@ export interface BalanceResponse {
 export const getBalance = () =>
   axios.get<BalanceResponse>("/api/balance");
 
-export const requestWithdrawal = (amount: number, method: string, receiverData: string) =>
-  axios.post("/api/payment/request-withdrawal", { amount, method, receiverData });
+export const requestWithdrawal = (amount: number, method: string, receiverData: string) => {
+  return axios.post("/api/payment/request-withdrawal", { amount, method, receiverData, property_id: null });
+}
+
+export const requestRefund = (requestId: string, reason?: string) =>
+  axios.post("/api/payment/request-refund", { request_id: requestId, reason });

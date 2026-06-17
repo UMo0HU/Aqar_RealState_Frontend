@@ -11,7 +11,7 @@ import LoadingSkeleton   from "@/features/properties/components/LoadingSkeleton"
 
 import { HOME_CARDS, PROPERTIES_SECTIONS } from "@/features/properties/data";
 import { getProperties }  from "@/services/propertyService";
-import { isLocallySponsoredProperty, sortPropertiesWithLocalSponsorship } from "@/services/sponsorshipService";
+import { sortPropertiesWithLocalSponsorship } from "@/services/sponsorshipService";
 import { useFavIds }      from "@/hooks/useFavIds";
 import { isPubliclyVisibleProperty } from "@/utils/propertyListing";
 import { mapProperty }    from "@/utils/mapProperty";
@@ -43,12 +43,12 @@ const HomePage = () => {
   // Shuffled slices are computed ONCE when properties loads, then frozen.
   // favIds changes (from heart toggles) will NOT trigger a re-shuffle because
   // favIds is not listed as a dependency here.
-  const forSale = useMemo(() => sortPropertiesWithLocalSponsorship(shuffle(properties.filter((p) => p.property_type === "for_sale")), "general").slice(0, 4), [properties]);
-  const forRent = useMemo(() => sortPropertiesWithLocalSponsorship(shuffle(properties.filter((p) => p.property_type === "for_rent")), "rental").slice(0, 4), [properties]);
+  const forSale = useMemo(() => sortPropertiesWithLocalSponsorship(shuffle(properties.filter((p) => p.property_type === "for_sale"))).slice(0, 4), [properties]);
+  const forRent = useMemo(() => sortPropertiesWithLocalSponsorship(shuffle(properties.filter((p) => p.property_type === "for_rent"))).slice(0, 4), [properties]);
 
   const featuredMix = useMemo(() => {
     const sponsored = sortPropertiesWithLocalSponsorship(
-      shuffle(properties.filter((p) => p.property_type === "for_rent" && (p.isSponsored || isLocallySponsoredProperty(p.propertyId)))),
+      shuffle(properties.filter((p) => p.property_type === "for_rent" && p.isSponsored)),
     ).slice(0, 4);
 
     console.log("HomePage — featuredMix (sponsored):", sponsored.length, "items", sponsored.map((p) => `#${p.propertyId} isSponsored=${p.isSponsored}`));

@@ -13,7 +13,7 @@ import {
   getStoredListingSubscription,
   syncStoredListingSubscriptionWithProperty,
 } from "@/services/listingSubscriptionService";
-import { isLocallySponsoredProperty } from "@/services/sponsorshipService";
+
 import { mapProperty }               from "@/utils/mapProperty";
 import { useToast }                  from "@/context/ToastContext";
 import type { Property }             from "@/types";
@@ -214,7 +214,7 @@ export default function MyPropertiesPage() {
                       Selling Plan
                     </button>
                   )}
-                  {p.isVerified && p.property_type === "for_rent" && !isLocallySponsoredProperty(p.propertyId) && (
+                  {p.isVerified && p.property_type === "for_rent" && !p.isSponsored && (
                     <button
                       type="button"
                       onClick={() => setBoostProperty(p)}
