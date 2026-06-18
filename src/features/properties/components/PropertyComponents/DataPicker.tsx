@@ -47,10 +47,12 @@ export default function DatePicker({ mode, onChange, disabledDates = [], onRange
   const [checkInDate, setCheckInDate] = useState<Date | undefined>();
   const [numMonths,   setNumMonths]   = useState<number>(1);
 
+  const isDisabled = (date: Date) => disabledDates.some((d) => isSameDay(date, d));
+
   const rangeHasDisabledDate = (from: Date, to: Date): boolean => {
     if (disabledDates.length === 0) return false;
     const days = eachDayOfInterval({ start: from, end: to });
-    return days.some((day) => disabledDates.some((d) => isSameDay(day, d)));
+    return days.some((day) => isDisabled(day));
   };
 
   const emitDay = (r: DateRange | undefined) => {
@@ -95,7 +97,7 @@ export default function DatePicker({ mode, onChange, disabledDates = [], onRange
               selected={dayRange}
               onSelect={emitDay}
               numberOfMonths={1}
-              disabled={[{ before: startOfDay(addDays(new Date(), 1)) }, ...disabledDates]}
+              disabled={[{ before: startOfDay(addDays(new Date(), 1)) }, isDisabled]}
             />
           </div>
         </div>
@@ -141,7 +143,7 @@ export default function DatePicker({ mode, onChange, disabledDates = [], onRange
               mode="single"
               selected={checkInDate}
               onSelect={(d) => {
-                if (d && disabledDates.some((dd) => isSameDay(d, dd))) {
+                if (d && isDisabled(d)) {
                   onRangeError?.("This date is unavailable.");
                   return;
                 }
@@ -149,7 +151,7 @@ export default function DatePicker({ mode, onChange, disabledDates = [], onRange
                 emitMonth(d ?? undefined, numMonths);
               }}
               numberOfMonths={1}
-              disabled={[{ before: startOfDay(addDays(new Date(), 1)) }, ...disabledDates]}
+              disabled={[{ before: startOfDay(addDays(new Date(), 1)) }, isDisabled]}
             />
           </div>
         </div>

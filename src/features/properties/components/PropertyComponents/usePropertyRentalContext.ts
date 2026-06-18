@@ -73,11 +73,19 @@ export function usePropertyRentalContext({ propertyId, enabled, role }: Options)
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
+    // Always fetch booked ranges (no auth required)
+    const [bookedResult] = await Promise.allSettled([getBookedDates(propertyId)]);
+
+    if (bookedResult.status === "fulfilled") {
+      setBookedRanges(bookedResult.value.data?.data ?? []);
+    } else {
+      setBookedRanges([]);
+    }
+
     if (!enabled) {
       setSentRequests([]);
       setReceivedRequests([]);
       setLeases([]);
-      setBookedRanges([]);
       setLoading(false);
       setError(null);
       return;
@@ -86,10 +94,9 @@ export function usePropertyRentalContext({ propertyId, enabled, role }: Options)
     setLoading(true);
     setError(null);
 
-    const [requestsResult, leasesResult, bookedResult] = await Promise.allSettled([
+    const [requestsResult, leasesResult] = await Promise.allSettled([
       getRentRequests(),
       role === "owner" ? getLeasesAsOwner() : getLeasesAsRenter(),
-      getBookedDates(propertyId),
     ]);
 
     if (requestsResult.status === "fulfilled") {
@@ -104,12 +111,6 @@ export function usePropertyRentalContext({ propertyId, enabled, role }: Options)
       setLeases(leasesResult.value.data.data ?? []);
     } else {
       setLeases([]);
-    }
-
-    if (bookedResult.status === "fulfilled") {
-      setBookedRanges(bookedResult.value.data.data ?? []);
-    } else {
-      setBookedRanges([]);
     }
 
     if (requestsResult.status === "rejected" && leasesResult.status === "rejected") {
