@@ -74,7 +74,7 @@ const NavBar = () => {
         <Link to="/"                         className="hover:text-amber-300 transition-colors">Browse</Link>
         <Link to="/properties?type=for_sale" className="hover:text-amber-300 transition-colors">Buy</Link>
         <Link to="/properties?type=for_rent" className="hover:text-amber-300 transition-colors">Rent</Link>
-        <Link to="/ai-assistant" className="hover:text-amber-300 transition-colors">AI Assistant</Link>
+        <Link to="/ai-assistant" className="hover:text-amber-300 transition-colors">Aqar Assistant</Link>
       </div>
 
       <div className="flex items-center gap-1">

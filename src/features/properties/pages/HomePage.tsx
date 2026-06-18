@@ -107,7 +107,7 @@ const HomePage = () => {
 
             return (
               <div key={sec.sectionTitle}>
-                <PropertiesSection {...sec} />
+                <PropertiesSection {...sec} hideViewAll={data === featuredMix} />
                 <div className="w-10/12 max-w-[1250px] mx-auto my-10 grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 items-stretch">
                   {data.length > 0 ? (
                     data.map((p) => (
