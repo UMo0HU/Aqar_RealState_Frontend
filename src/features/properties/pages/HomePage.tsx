@@ -47,17 +47,8 @@ const HomePage = () => {
   const forRent = useMemo(() => sortPropertiesWithLocalSponsorship(shuffle(properties.filter((p) => p.property_type === "for_rent"))).slice(0, 4), [properties]);
 
   const featuredMix = useMemo(() => {
-    const sponsored = sortPropertiesWithLocalSponsorship(
-      shuffle(properties.filter((p) => p.property_type === "for_rent" && p.isSponsored)),
-    ).slice(0, 4);
-
-    console.log("HomePage — featuredMix (sponsored):", sponsored.length, "items", sponsored.map((p) => `#${p.propertyId} isSponsored=${p.isSponsored}`));
-
-    if (sponsored.length > 0) return sponsored;
-
-    console.log("HomePage — featuredMix empty, falling back to generic for_rent properties");
     return sortPropertiesWithLocalSponsorship(
-      shuffle(properties.filter((p) => p.property_type === "for_rent")),
+      shuffle(properties.filter((p) => p.property_type === "for_rent" && p.isSponsored)),
     ).slice(0, 4);
   }, [properties]);
 
@@ -103,7 +94,10 @@ const HomePage = () => {
         <LoadingSkeleton />
       ) : (
         <>
-          {PROPERTIES_SECTIONS.map((sec) => {
+          {PROPERTIES_SECTIONS.filter((sec) => {
+            const t = sec.sectionTitle.toLowerCase();
+            return t.includes("sale") || t.includes("sell") || t.includes("rent") || featuredMix.length > 0;
+          }).map((sec) => {
             const t    = sec.sectionTitle.toLowerCase();
             const data = t.includes("sale") || t.includes("sell")
               ? forSale
