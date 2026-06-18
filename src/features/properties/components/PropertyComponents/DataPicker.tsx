@@ -96,6 +96,8 @@ export default function DatePicker({ mode, onChange, disabledDates = [], onRange
               onSelect={emitDay}
               numberOfMonths={1}
               disabled={[{ before: startOfDay(addDays(new Date(), 1)) }, ...disabledDates]}
+              modifiers={{ busy: disabledDates }}
+              modifiersStyles={{ busy: { backgroundColor: "#FEE2E2", color: "#DC2626", borderRadius: "100%" } }}
             />
           </div>
         </div>
@@ -150,6 +152,8 @@ export default function DatePicker({ mode, onChange, disabledDates = [], onRange
               }}
               numberOfMonths={1}
               disabled={[{ before: startOfDay(addDays(new Date(), 1)) }, ...disabledDates]}
+              modifiers={{ busy: disabledDates }}
+              modifiersStyles={{ busy: { backgroundColor: "#FEE2E2", color: "#DC2626", borderRadius: "100%" } }}
             />
           </div>
         </div>
