@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { DayPicker, type DateRange } from "react-day-picker";
-import { format, addMonths, startOfDay, differenceInCalendarDays, eachDayOfInterval, isSameDay } from "date-fns";
+import { format, addMonths, addDays, startOfDay, differenceInCalendarDays, eachDayOfInterval, isSameDay } from "date-fns";
 
 export interface DateSelection {
   checkIn:     string;
@@ -95,7 +95,7 @@ export default function DatePicker({ mode, onChange, disabledDates = [], onRange
               selected={dayRange}
               onSelect={emitDay}
               numberOfMonths={1}
-              disabled={[{ before: startOfDay(new Date()) }, ...disabledDates]}
+              disabled={[{ before: startOfDay(addDays(new Date(), 1)) }, ...disabledDates]}
             />
           </div>
         </div>
@@ -149,7 +149,7 @@ export default function DatePicker({ mode, onChange, disabledDates = [], onRange
                 emitMonth(d ?? undefined, numMonths);
               }}
               numberOfMonths={1}
-              disabled={[{ before: startOfDay(new Date()) }, ...disabledDates]}
+              disabled={[{ before: startOfDay(addDays(new Date(), 1)) }, ...disabledDates]}
             />
           </div>
         </div>
