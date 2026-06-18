@@ -96,13 +96,9 @@ export default function DatePicker({ mode, onChange, disabledDates = [], onRange
               onSelect={emitDay}
               numberOfMonths={1}
               disabled={[{ before: startOfDay(addDays(new Date(), 1)) }, ...disabledDates]}
-              modifiers={{ busy: disabledDates }}
-              modifiersClassNames={{ busy: "rdp-busy" }}
             />
           </div>
         </div>
-
-        <style>{`.rdp-busy{background-color:#FEE2E2!important;color:#DC2626!important;border-radius:100%!important}`}</style>
 
         <div className="grid grid-cols-2 gap-2 mt-1 max-w-[280px] mx-auto">
           {[
@@ -154,10 +150,7 @@ export default function DatePicker({ mode, onChange, disabledDates = [], onRange
               }}
               numberOfMonths={1}
               disabled={[{ before: startOfDay(addDays(new Date(), 1)) }, ...disabledDates]}
-              modifiers={{ busy: disabledDates }}
-              modifiersClassNames={{ busy: "rdp-busy" }}
             />
-            <style>{`.rdp-busy{background-color:#FEE2E2!important;color:#DC2626!important;border-radius:100%!important}`}</style>
           </div>
         </div>
       </div>
