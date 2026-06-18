@@ -3,7 +3,8 @@ import { getAuthToken } from "@/api/tokenStore";
 import { loadAuth } from "@/utils/authStorage";
 
 // Use VITE_API_URL in your .env for production; falls back to localhost in dev
-export const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+const rawUrl = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+export const BASE_URL = rawUrl.replace(/\/+$/, "");
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
