@@ -9,8 +9,6 @@ const axiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: 10000,
   headers: {
-    // THIS is the line that stops ngrok from returning the HTML error page
-    'ngrok-skip-browser-warning': 'true',
     'Content-Type': 'application/json'
   }
 });
