@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 
 import NavBar from "@/features/properties/components/NavBar";
 import { getLeaseById } from "@/services/leaseService";
+import { resolveImageUrl } from "@/services/propertyService";
 import type { Lease } from "@/types";
 
 const STATUS_STYLES: Record<string, string> = {
@@ -56,7 +57,7 @@ export default function LeaseDetailPage() {
   }
 
   const imgs: string[] = lease.images
-    ? (typeof lease.images === "string" ? JSON.parse(lease.images) : lease.images)
+    ? (typeof lease.images === "string" ? JSON.parse(lease.images) : lease.images).map(resolveImageUrl)
     : [];
 
   return (
