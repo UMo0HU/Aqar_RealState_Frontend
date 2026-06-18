@@ -1,6 +1,9 @@
 import axios, { BASE_URL } from "@/api/axiosInstance";
 import type { PropertyFormData } from "@/types";
 
+export const getBookedDates = (propertyId: number) =>
+  axios.get(`/properties/${propertyId}/booked-dates`);
+
 export const resolveImageUrl = (path: string): string => {
   if (!path) return "";
   if (path.startsWith("http")) return path;

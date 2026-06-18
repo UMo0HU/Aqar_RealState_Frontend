@@ -4,6 +4,7 @@ import { eachDayOfInterval } from "date-fns";
 
 import { getLeasesAsOwner, getLeasesAsRenter } from "@/services/leaseService";
 import { getRentRequests } from "@/services/rentRequestService";
+import { getBookedDates } from "@/services/propertyService";
 import type { Lease, RentRequest, RentRequestState } from "@/types";
 
 type RentalRole = "owner" | "viewer";
@@ -67,6 +68,7 @@ export function usePropertyRentalContext({ propertyId, enabled, role }: Options)
   const [sentRequests, setSentRequests] = useState<RentRequest[]>([]);
   const [receivedRequests, setReceivedRequests] = useState<RentRequest[]>([]);
   const [leases, setLeases] = useState<Lease[]>([]);
+  const [bookedRanges, setBookedRanges] = useState<{check_in_date: string; check_out_date: string}[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -75,6 +77,7 @@ export function usePropertyRentalContext({ propertyId, enabled, role }: Options)
       setSentRequests([]);
       setReceivedRequests([]);
       setLeases([]);
+      setBookedRanges([]);
       setLoading(false);
       setError(null);
       return;
@@ -83,9 +86,10 @@ export function usePropertyRentalContext({ propertyId, enabled, role }: Options)
     setLoading(true);
     setError(null);
 
-    const [requestsResult, leasesResult] = await Promise.allSettled([
+    const [requestsResult, leasesResult, bookedResult] = await Promise.allSettled([
       getRentRequests(),
       role === "owner" ? getLeasesAsOwner() : getLeasesAsRenter(),
+      getBookedDates(propertyId),
     ]);
 
     if (requestsResult.status === "fulfilled") {
@@ -102,6 +106,12 @@ export function usePropertyRentalContext({ propertyId, enabled, role }: Options)
       setLeases([]);
     }
 
+    if (bookedResult.status === "fulfilled") {
+      setBookedRanges(bookedResult.value.data.data ?? []);
+    } else {
+      setBookedRanges([]);
+    }
+
     if (requestsResult.status === "rejected" && leasesResult.status === "rejected") {
       const requestsError = axios.isAxiosError(requestsResult.reason)
         ? requestsResult.reason.response?.data?.msg
@@ -114,7 +124,7 @@ export function usePropertyRentalContext({ propertyId, enabled, role }: Options)
     }
 
     setLoading(false);
-  }, [enabled, role]);
+  }, [enabled, role, propertyId]);
 
   useEffect(() => {
     load();
@@ -159,8 +169,12 @@ export function usePropertyRentalContext({ propertyId, enabled, role }: Options)
       }
     }
 
+    for (const range of bookedRanges) {
+      addRange(range.check_in_date, range.check_out_date);
+    }
+
     return result;
-  }, [propertyLeases, propertyReceivedRequests]);
+  }, [propertyLeases, propertyReceivedRequests, bookedRanges]);
 
   return {
     loading,
