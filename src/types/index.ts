@@ -142,6 +142,7 @@ export interface Lease {
   check_in_date:     string;
   check_out_date:    string;
   next_billing_date: string | null;
+  renter_name?:      string;
   // Joined fields (available on detail endpoint)
   property_name?:    string;
   location?:         string;

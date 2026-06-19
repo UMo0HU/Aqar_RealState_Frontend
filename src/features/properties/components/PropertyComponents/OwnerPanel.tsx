@@ -76,7 +76,7 @@ export default function OwnerPanel({ property }: Props) {
   const openRenterChat = useCallback(() => {
     if (!currentRenterId) return;
 
-    const partnerName = "Current Renter";
+    const partnerName = relevantLease?.renter_name ?? "Current Renter";
     const existingChat = findRememberedChatContext(property.propertyId, currentRenterId);
     const chatState = {
       partnerName,
@@ -97,7 +97,7 @@ export default function OwnerPanel({ property }: Props) {
         ...chatState,
       },
     });
-  }, [currentRenterId, navigate, property.images, property.propertyId, property.propertyName]);
+  }, [currentRenterId, navigate, property.images, property.propertyId, property.propertyName, relevantLease]);
 
   const handleDelete = async () => {
     if (!window.confirm(`Delete "${property.propertyName}"? This cannot be undone.`)) return;
