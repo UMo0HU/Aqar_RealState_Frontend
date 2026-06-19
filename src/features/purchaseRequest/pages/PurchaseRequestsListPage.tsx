@@ -85,7 +85,7 @@ export default function PurchaseRequestsListPage() {
     if (existingChat) {
       navigate(`/chat/${existingChat.chat_id}`, { state: chatState });
     } else {
-      navigate("/chat/start", { state: chatState });
+      navigate("/chat/start", { state: { receiverId: partnerId, ...chatState } });
     }
   };
 

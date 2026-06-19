@@ -16,7 +16,7 @@ const PropertyLocationMap: FC<Props> = ({ latitude, longitude, location }) => {
     : `https://www.google.com/maps/search/${encodeURIComponent(location)}`;
 
   return (
-    <div className="bg-white rounded-2xl shadow overflow-hidden">
+    <div className="bg-white rounded-2xl shadow overflow-hidden" style={{ isolation: "isolate" }}>
 
       {/* Header — stacks vertically on mobile, side-by-side from sm up */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-6 py-4 border-b border-gray-100">

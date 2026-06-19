@@ -471,8 +471,8 @@ export default function BookingSidebar({ property }: Props) {
   };
 
   return (
-    <div className="flex flex-col min-[768px]:max-[1049px]:flex-row gap-5 items-start">
-      <div className="bg-white p-6 rounded-2xl shadow-xl space-y-5 w-full min-[768px]:max-[1049px]:flex-3 min-[768px]:max-[1049px]:min-w-0">
+    <div className="flex flex-col gap-5 items-start">
+      <div className="bg-white p-6 rounded-2xl shadow-xl space-y-5 w-full">
         <div className="flex justify-between items-end gap-3">
           <div>
             <p className="text-xs text-gray-400 font-medium uppercase tracking-wide mb-1">
@@ -609,7 +609,7 @@ export default function BookingSidebar({ property }: Props) {
         </div>
       </div>
 
-      <div className="bg-white p-5 rounded-2xl shadow-md w-full min-[768px]:max-[1049px]:flex-2 min-[768px]:max-[1049px]:min-w-0">
+      <div className="bg-white p-5 rounded-2xl shadow-md w-full">
         <h3 className="font-semibold text-base mb-3">Property Info</h3>
         <div className="text-sm text-gray-600 space-y-3">
           <div className="flex justify-between">

@@ -74,7 +74,7 @@ const PropertyPage = () => {
         <div className="w-[90%] max-w-7xl mx-auto mt-8 flex flex-col min-[1050px]:flex-row gap-8 items-start">
 
           {/* Main content */}
-          <div className="flex-1 min-w-0 space-y-8">
+          <div className="flex-1 min-w-0 w-full space-y-8">
             <PropertyFeatures    property={property} />
             <PropertyDescription property={property} />
             <PropertyLocationMap
