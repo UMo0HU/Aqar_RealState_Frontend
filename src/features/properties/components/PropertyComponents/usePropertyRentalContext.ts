@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import axios from "axios";
-import { eachDayOfInterval } from "date-fns";
+import { eachDayOfInterval, parseISO, isValid } from "date-fns"; // استخدام دالة جاهزة من date-fns
 
 import { getLeasesAsOwner, getLeasesAsRenter } from "@/services/leaseService";
 import { getRentRequests } from "@/services/rentRequestService";
@@ -35,9 +34,9 @@ const LEASE_PRIORITY: Record<Lease["status"], number> = {
   CANCELLED: 4,
 };
 
+// تم تعديل دالة التحويل لتستخدم parseISO بدلاً من التقسيم اليدوي
 const parseDate = (dateStr: string): Date => {
-  const [y, m, d] = dateStr.split("-").map(Number);
-  return new Date(y, m - 1, d);
+  return parseISO(dateStr);
 };
 
 const compareRequests = (left: RentRequest, right: RentRequest) => {
@@ -73,7 +72,6 @@ export function usePropertyRentalContext({ propertyId, enabled, role }: Options)
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    // Always fetch booked ranges (no auth required)
     const [bookedResult] = await Promise.allSettled([getBookedDates(propertyId)]);
 
     if (bookedResult.status === "fulfilled") {
@@ -113,17 +111,6 @@ export function usePropertyRentalContext({ propertyId, enabled, role }: Options)
       setLeases([]);
     }
 
-    if (requestsResult.status === "rejected" && leasesResult.status === "rejected") {
-      const requestsError = axios.isAxiosError(requestsResult.reason)
-        ? requestsResult.reason.response?.data?.msg
-        : null;
-      const leasesError = axios.isAxiosError(leasesResult.reason)
-        ? leasesResult.reason.response?.data?.msg
-        : null;
-
-      setError(requestsError || leasesError || "Could not load booking status.");
-    }
-
     setLoading(false);
   }, [enabled, role, propertyId]);
 
@@ -150,29 +137,33 @@ export function usePropertyRentalContext({ propertyId, enabled, role }: Options)
     const result: Date[] = [];
 
     const addRange = (checkIn: string, checkOut: string) => {
-      try {
-        const days = eachDayOfInterval({ start: parseDate(checkIn), end: parseDate(checkOut) });
-        result.push(...days);
-      } catch {
-        /* skip invalid date strings */
+      const start = parseDate(checkIn);
+      const end = parseDate(checkOut);
+
+      // التحقق من أن التاريخ صالح
+      if (isValid(start) && isValid(end)) {
+        if (start <= end) {
+          const days = eachDayOfInterval({ start, end });
+          result.push(...days);
+        }
       }
     };
 
-    for (const lease of propertyLeases) {
+    propertyLeases.forEach((lease) => {
       if (lease.status !== "CANCELLED" && lease.status !== "COMPLETED") {
         addRange(lease.check_in_date, lease.check_out_date);
       }
-    }
+    });
 
-    for (const req of propertyReceivedRequests) {
+    propertyReceivedRequests.forEach((req) => {
       if (["PENDING", "ACCEPTED", "PAYMENT_PENDING", "PAID"].includes(req.request_state)) {
         addRange(req.check_in_date, req.check_out_date);
       }
-    }
+    });
 
-    for (const range of bookedRanges) {
+    bookedRanges.forEach((range) => {
       addRange(range.check_in_date, range.check_out_date);
-    }
+    });
 
     return result;
   }, [propertyLeases, propertyReceivedRequests, bookedRanges]);

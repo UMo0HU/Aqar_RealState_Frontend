@@ -97,7 +97,10 @@ export default function DatePicker({ mode, onChange, disabledDates = [], onRange
               selected={dayRange}
               onSelect={emitDay}
               numberOfMonths={1}
-              disabled={[{ before: startOfDay(addDays(new Date(), 1)) }, isDisabled]}
+              disabled={(date: Date) => {
+                const isPastOrToday = date < startOfDay(addDays(new Date(), 1));
+                return isPastOrToday || isDisabled(date);
+              }}
             />
           </div>
         </div>
@@ -151,7 +154,10 @@ export default function DatePicker({ mode, onChange, disabledDates = [], onRange
                 emitMonth(d ?? undefined, numMonths);
               }}
               numberOfMonths={1}
-              disabled={[{ before: startOfDay(addDays(new Date(), 1)) }, isDisabled]}
+              disabled={(date: Date) => {
+                const isPastOrToday = date < startOfDay(addDays(new Date(), 1));
+                return isPastOrToday || isDisabled(date);
+              }}
             />
           </div>
         </div>
