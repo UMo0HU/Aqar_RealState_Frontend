@@ -257,7 +257,7 @@ export default function ChatInboxPage() {
                       </p>
                     </div>
                     <p className="text-xs text-gray-400 truncate mb-0.5">
-                      📍 {chat.property_name}
+                      📍 {chat.is_property_deleted ? "Listing Removed" : chat.property_name}
                     </p>
                     <p className={`text-xs truncate ${unread ? "text-gray-700 font-semibold" : "text-gray-400"}`}>
                       {chat.last_message ?? "Start the conversation…"}

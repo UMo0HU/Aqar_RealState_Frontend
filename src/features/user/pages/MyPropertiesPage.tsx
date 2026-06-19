@@ -64,12 +64,12 @@ export default function MyPropertiesPage() {
   }, []);
 
   const handleDelete = async (id: number, name: string) => {
-    if (!window.confirm(`Delete "${name}"? This cannot be undone.`)) return;
+    if (!window.confirm(`Delete "${name}"? This will hide it from search results.`)) return;
     try {
       setDeletingId(id);
       await deleteProperty(String(id));
-      setProperties((prev) => prev.filter((p) => p.propertyId !== id));
-      toast.success("Property deleted.");
+      setProperties((prev) => prev.map((p) => p.propertyId === id ? { ...p, isVisible: false } : p));
+      toast.success("Property hidden from search results.");
     } catch (err) {
       toast.error(axios.isAxiosError(err) ? (err.response?.data?.msg ?? "Delete failed.") : "Delete failed.");
     } finally {
@@ -78,6 +78,9 @@ export default function MyPropertiesPage() {
   };
 
   const StatusBadge = ({ p }: { p: Property }) => {
+    if (p.isVisible === false) {
+      return <span className="text-[11px] font-bold bg-gray-200 text-gray-500 px-2.5 py-0.5 rounded-full">Deleted</span>;
+    }
     if (p.property_type === "for_sale") {
       const subscription = syncStoredListingSubscriptionWithProperty(p)
         ?? getStoredListingSubscription(p.propertyId);
@@ -225,10 +228,10 @@ export default function MyPropertiesPage() {
                   )}
                   <button
                     onClick={() => handleDelete(p.propertyId, p.propertyName)}
-                    disabled={deletingId === p.propertyId}
+                    disabled={deletingId === p.propertyId || p.isVisible === false}
                     className="text-xs px-3.5 py-1.5 bg-red-50 text-red-600 rounded-lg font-bold hover:bg-red-100 transition disabled:opacity-50"
                   >
-                    {deletingId === p.propertyId ? "…" : "Delete"}
+                    {deletingId === p.propertyId ? "…" : p.isVisible === false ? "Deleted" : "Delete"}
                   </button>
                 </div>
               </div>

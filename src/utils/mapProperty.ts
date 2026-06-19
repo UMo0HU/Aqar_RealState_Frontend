@@ -24,6 +24,7 @@ export const mapProperty = (prop: any): Property => ({
   ownershipProof:    (prop.ownership_proofs ?? []).map(resolveImageUrl),
   isAvailable:       !!prop.is_available,
   isVerified:        !!prop.is_verified,
+  isVisible:         prop.is_visible !== false,
   is_furnished:      !!prop.is_furnished,
   isSponsored:       !!prop.is_sponsored,
   property_type:     prop.property_type,

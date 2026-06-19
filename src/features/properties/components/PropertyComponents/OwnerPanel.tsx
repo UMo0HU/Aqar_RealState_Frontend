@@ -336,7 +336,7 @@ export default function OwnerPanel({ property }: Props) {
               >
                 Manage Selling Plan
               </button>
-              {property.listingStatus === "active" && (
+              {property.listingStatus !== "sold" && (
                 <button
                   type="button"
                   onClick={handleMarkAsSold}

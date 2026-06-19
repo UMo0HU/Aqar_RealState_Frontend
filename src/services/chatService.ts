@@ -10,6 +10,7 @@ export interface InboxChat {
   last_message: string | null;
   last_message_time: string | null;
   unread_count: number;
+  is_property_deleted?: boolean;
 }
 
 export interface ChatMessage {

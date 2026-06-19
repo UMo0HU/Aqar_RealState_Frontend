@@ -56,7 +56,18 @@ export default function ProfilePage() {
 
     try {
       setSaving(true);
-      await updateProfile(payload);
+      const res = await updateProfile(payload);
+      const emailChanged = res.data?.emailChanged === true;
+
+      // If email changed, redirect to OTP verification page
+      if (emailChanged) {
+        localStorage.setItem("email", payload.email ?? profile?.email ?? "");
+        toast.success("Verification code sent to your new email.");
+        setForm((f) => ({ ...f, password: "", confirmPassword: "" }));
+        navigate("/auth/verify-email");
+        return;
+      }
+
       toast.success("Profile updated successfully!");
       setForm((f) => ({ ...f, password: "", confirmPassword: "" }));
 
@@ -101,9 +112,13 @@ export default function ProfilePage() {
             <div>
               <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
               <p className="text-sm text-gray-500 mt-0.5">{userInfo?.email}</p>
-              {profile?.is_verified && (
+              {profile?.is_verified ? (
                 <span className="mt-1 inline-block text-xs font-bold text-green-700 bg-green-100 px-2.5 py-0.5 rounded-full">
                   ✓ Verified
+                </span>
+              ) : (
+                <span className="mt-1 inline-block text-xs font-bold text-amber-700 bg-amber-100 px-2.5 py-0.5 rounded-full">
+                  ⚠ Unverified — verify your email
                 </span>
               )}
             </div>

@@ -28,6 +28,7 @@ export interface Property {
   ownershipProof:   string[];
   isAvailable:      boolean;
   isVerified:       boolean;
+  isVisible?:       boolean;
   is_furnished:     boolean;
   isSponsored?:     boolean;  // backend sets is_sponsored after sponsorship payment webhook
   property_type:    property_type;
