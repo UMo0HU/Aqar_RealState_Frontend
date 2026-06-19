@@ -133,9 +133,8 @@ const NavBar = () => {
                     {[
                       { to: "/profile",       icon: <ProfileIcon />, label: "Profile"       },
                       { to: "/my-properties", icon: "🏠",            label: "My Properties" },
-                      { to: "/rent-requests",     icon: "📨", label: "Rent Requests"     },
-                      { to: "/purchase-requests", icon: "🏷️", label: "Purchase Requests" },
-                      { to: "/leases",            icon: "📋", label: "My Leases"         },
+                      { to: "/rent-requests", icon: "📨", label: "Rent Requests" },
+                      { to: "/leases",        icon: "📋", label: "My Leases"     },
                       { to: "/invoices",         icon: "🧾", label: "Invoices"          },
                       { to: "/favorites",     icon: "❤️",            label: "Saved"         },
                       { to: "/chat",          icon: "💬",            label: "Messages"      },

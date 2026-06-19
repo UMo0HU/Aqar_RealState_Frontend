@@ -1,18 +1,21 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 
 import NavBar from "@/features/properties/components/NavBar";
 import ReviewsSection from "@/features/properties/components/PropertyComponents/ReviewSection";
 import { getPropertyById } from "@/services/propertyService";
-import type { Property } from "@/types";
+import { getLeasesAsRenter } from "@/services/leaseService";
+import type { Lease, Property } from "@/types";
 import { getApiErrorMessage } from "@/utils/apiError";
 import { mapProperty } from "@/utils/mapProperty";
 
 export default function ReviewPage() {
   const { propertyId } = useParams<{ propertyId: string }>();
+  const navigate = useNavigate();
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [canReview, setCanReview] = useState(false);
 
   const loadProperty = useCallback(async () => {
     if (!propertyId) {
@@ -25,14 +28,28 @@ export default function ReviewPage() {
     setError(null);
 
     try {
-      const res = await getPropertyById(propertyId);
-      setProperty(mapProperty(res.data));
+      const propRes = await getPropertyById(propertyId);
+      const prop = mapProperty(propRes.data);
+      setProperty(prop);
+
+      const leasesRes = await getLeasesAsRenter();
+      const leases: Lease[] = leasesRes.data.data ?? [];
+      const hasCompleted = leases.some(
+        (l) => Number(l.property_id) === Number(propertyId) && l.status === "COMPLETED"
+      );
+
+      if (!hasCompleted) {
+        navigate("/", { replace: true });
+        return;
+      }
+
+      setCanReview(true);
     } catch (loadError) {
       setError(getApiErrorMessage(loadError, "Could not load this property."));
     } finally {
       setLoading(false);
     }
-  }, [propertyId]);
+  }, [propertyId, navigate]);
 
   useEffect(() => {
     loadProperty();
@@ -66,7 +83,7 @@ export default function ReviewPage() {
             </div>
           )}
 
-          {!loading && property && (
+          {!loading && property && canReview && (
             <ReviewsSection
               property={property}
               autoFocusForm

@@ -33,6 +33,7 @@ export const TYPE_ICONS: Record<string, string> = {
   TENANT_PAYMENT_FAILED: "🚩",
   LEASE_COMPLETED: "🏠",
   LEASE_TERMINATED: "🚫",
+  BOOKING_CANCELLED: "🔄",
   PURCHASE_REQUEST: "🏡",
   REQUEST_ACCEPTED: "🤝",
   REQUEST_REJECTED: "❌",
@@ -112,6 +113,7 @@ export const resolveNotificationRoute = (notification: Notification): string | n
     case "TENANT_PAYMENT_FAILED":
     case "LEASE_COMPLETED":
     case "LEASE_TERMINATED":
+    case "BOOKING_CANCELLED":
       return "/leases";
 
     case "LISTING_FEE_PAID":
@@ -122,8 +124,6 @@ export const resolveNotificationRoute = (notification: Notification): string | n
     case "PURCHASE_REQUEST":
     case "REQUEST_ACCEPTED":
     case "REQUEST_REJECTED":
-      return "/purchase-requests";
-
     case "PROPERTY_SOLD":
       return "/my-properties";
 

@@ -150,28 +150,6 @@ export interface Lease {
   price_value?:      number;
 }
 
-// ─── Purchase Request ─────────────────────────────────────────────────────────
-export type PurchaseRequestStatus = "PENDING" | "ACCEPTED" | "REJECTED" | "CANCELLED";
-
-export interface PurchaseRequest {
-  request_id:        number;
-  property_id:       number;
-  buyer_id:          string;
-  owner_id:          string;
-  status:            PurchaseRequestStatus;
-  message:           string | null;
-  contact_unlocked:  boolean;
-  created_at:        string;
-  property_name?:        string;
-  listing_status?:       string;
-  buyer_first_name?:     string;
-  buyer_second_name?:    string;
-  buyer_email?:          string;
-  owner_first_name?:     string;
-  owner_second_name?:    string;
-  images?:               string;
-}
-
 // ─── Notification ─────────────────────────────────────────────────────────────
 export interface Notification {
   notification_id:   string;

@@ -10,6 +10,7 @@ import {
 } from "@/services/listingSubscriptionService";
 import SponsorshipModal from "@/features/subscription/components/SponsorshipModal";
 
+import { saleService } from "@/services/saleService";
 import { getSaleListingLabel, getSaleListingTone } from "@/utils/propertyListing";
 import { getSaleSubscriptionUiState, hasExpiredSaleListing } from "@/utils/saleSubscriptionState";
 import { useToast } from "@/context/ToastContext";
@@ -98,6 +99,26 @@ export default function OwnerPanel({ property }: Props) {
       },
     });
   }, [currentRenterId, navigate, property.images, property.propertyId, property.propertyName, relevantLease]);
+
+  const [markingSold, setMarkingSold] = useState(false);
+
+  const handleMarkAsSold = async () => {
+    if (!window.confirm(`Mark "${property.propertyName}" as sold? This will hide it from search results.`)) return;
+    try {
+      setMarkingSold(true);
+      await saleService.markAsSold(property.propertyId);
+      toast.success("Property marked as sold.");
+      navigate(0);
+    } catch (err) {
+      toast.error(
+        axios.isAxiosError(err)
+          ? (err.response?.data?.message ?? "Failed to mark as sold.")
+          : "Failed to mark as sold.",
+      );
+    } finally {
+      setMarkingSold(false);
+    }
+  };
 
   const handleDelete = async () => {
     if (!window.confirm(`Delete "${property.propertyName}"? This cannot be undone.`)) return;
@@ -307,13 +328,25 @@ export default function OwnerPanel({ property }: Props) {
 
         <div className="space-y-2.5">
           {isSale && (
-            <button
-              type="button"
-              onClick={() => navigate(`/property/${property.propertyId}/subscription`)}
-              className="w-full bg-dark-knight text-white py-3 rounded-full font-bold hover:opacity-90 transition cursor-pointer"
-            >
-              Manage Selling Plan
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={() => navigate(`/property/${property.propertyId}/subscription`)}
+                className="w-full bg-dark-knight text-white py-3 rounded-full font-bold hover:opacity-90 transition cursor-pointer"
+              >
+                Manage Selling Plan
+              </button>
+              {property.listingStatus === "active" && (
+                <button
+                  type="button"
+                  onClick={handleMarkAsSold}
+                  disabled={markingSold}
+                  className="w-full border border-slate-300 py-3 rounded-full font-semibold text-sm hover:bg-slate-50 transition cursor-pointer disabled:opacity-50"
+                >
+                  {markingSold ? "Marking…" : "Mark as Sold"}
+                </button>
+              )}
+            </>
           )}
           {!isSale && (
             <button

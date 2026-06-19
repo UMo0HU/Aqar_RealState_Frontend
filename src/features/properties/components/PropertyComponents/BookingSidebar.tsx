@@ -4,7 +4,6 @@ import axios from "axios";
 import { eachDayOfInterval, isSameDay } from "date-fns";
 
 import DatePicker, { type DateSelection } from "@/features/properties/components/PropertyComponents/DataPicker";
-import PurchaseRequestModal from "@/features/properties/components/PropertyComponents/PurchaseRequestModal";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import { findRememberedChatContext } from "@/services/chatService";
@@ -62,7 +61,6 @@ export default function BookingSidebar({ property }: Props) {
   const [showPicker, setShowPicker] = useState(false);
   const [selection, setSelection] = useState<DateSelection | null>(null);
   const [busyAction, setBusyAction] = useState<"create" | "cancel" | null>(null);
-  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
   const {
     loading: rentalStatusLoading,
@@ -262,15 +260,6 @@ export default function BookingSidebar({ property }: Props) {
           {canMessageSeller ? "Message Seller" : "Sale Chat Unavailable"}
         </button>
 
-        {isAuthenticated && canMessageSeller && (
-          <button
-            type="button"
-            onClick={() => setShowPurchaseModal(true)}
-            className="w-full rounded-full border border-dark-knight py-3 font-bold text-dark-knight transition hover:bg-dark-knight hover:text-white cursor-pointer"
-          >
-            Send Purchase Request
-          </button>
-        )}
       </>
     );
   };
@@ -663,12 +652,6 @@ export default function BookingSidebar({ property }: Props) {
         </div>
       </div>
 
-      {showPurchaseModal && (
-        <PurchaseRequestModal
-          propertyId={property.propertyId}
-          onClose={() => setShowPurchaseModal(false)}
-        />
-      )}
     </div>
   );
 }

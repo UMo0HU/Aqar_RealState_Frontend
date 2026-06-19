@@ -34,9 +34,6 @@ import NotificationsPage from "@/features/user/pages/NotificationsPage";
 // ─── Rent Request ─────────────────────────────────────────────────────────────
 import RentRequestsListPage from "@/features/rentRequest/pages/RentRequestsListPage";
 
-// ─── Purchase Request ─────────────────────────────────────────────────────────
-import PurchaseRequestsListPage from "@/features/purchaseRequest/pages/PurchaseRequestsListPage";
-
 // ─── Lease ────────────────────────────────────────────────────────────────────
 import LeasesPage from "@/features/lease/pages/LeasesPage";
 import LeaseDetailPage from "@/features/lease/pages/LeaseDetailPage";
@@ -95,7 +92,6 @@ function AppContent() {
         <Route path="/invoices"             element={<ProtectedRoute><InvoicesPage /></ProtectedRoute>} />
         <Route path="/notifications"         element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
         <Route path="/rent-requests"         element={<ProtectedRoute><RentRequestsListPage /></ProtectedRoute>} />
-        <Route path="/purchase-requests"    element={<ProtectedRoute><PurchaseRequestsListPage /></ProtectedRoute>} />
         <Route path="/leases"                element={<ProtectedRoute><LeasesPage /></ProtectedRoute>} />
         <Route path="/leases/:leaseId"      element={<ProtectedRoute><LeaseDetailPage /></ProtectedRoute>} />
         
