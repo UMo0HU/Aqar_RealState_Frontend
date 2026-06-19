@@ -200,7 +200,7 @@ export default function RentRequestsListPage() {
           </button>
         )}
 
-        {tab === "sent" && req.request_state === "PAID" && (
+        {tab === "sent" && req.request_state === "PAID" && new Date(req.check_in_date) > new Date() && (
           <>
             <button
               onClick={() => setRefunding(req.request_id)}
