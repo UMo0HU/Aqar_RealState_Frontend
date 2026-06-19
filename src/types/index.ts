@@ -161,12 +161,14 @@ export interface PurchaseRequest {
   message:           string | null;
   contact_unlocked:  boolean;
   created_at:        string;
-  property_name?:    string;
-  listing_status?:   string;
-  buyer_first_name?: string;
-  buyer_second_name?: string;
-  buyer_email?:      string;
-  images?:           string;
+  property_name?:        string;
+  listing_status?:       string;
+  buyer_first_name?:     string;
+  buyer_second_name?:    string;
+  buyer_email?:          string;
+  owner_first_name?:     string;
+  owner_second_name?:    string;
+  images?:               string;
 }
 
 // ─── Notification ─────────────────────────────────────────────────────────────

@@ -6,6 +6,7 @@ import NavBar from "@/features/properties/components/NavBar";
 import {
   purchaseRequestService,
 } from "@/services/purchaseRequestService";
+import { findRememberedChatContext } from "@/services/chatService";
 import { useToast } from "@/context/ToastContext";
 import type { PurchaseRequest } from "@/types";
 
@@ -78,6 +79,16 @@ export default function PurchaseRequestsListPage() {
     }
   };
 
+  const handleOpenChat = (partnerId: string, partnerName: string, propertyId: number, propertyName?: string) => {
+    const existingChat = findRememberedChatContext(propertyId, partnerId);
+    const chatState = { partnerName, partnerId, propertyId, propertyName: propertyName ?? `Property #${propertyId}` };
+    if (existingChat) {
+      navigate(`/chat/${existingChat.chat_id}`, { state: chatState });
+    } else {
+      navigate("/chat/start", { state: chatState });
+    }
+  };
+
   const current = tab === "sent" ? sent : received;
 
   const Card = ({ req }: { req: PurchaseRequest }) => (
@@ -123,6 +134,16 @@ export default function PurchaseRequestsListPage() {
           </button>
         )}
 
+        {/* Sent tab — message seller */}
+        {tab === "sent" && (req.status === "PENDING" || req.status === "ACCEPTED") && req.owner_id && (
+          <button
+            onClick={() => handleOpenChat(req.owner_id, [req.owner_first_name, req.owner_second_name].filter(Boolean).join(" ") || "Seller", req.property_id, req.property_name)}
+            className="text-xs px-4 py-1.5 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition cursor-pointer"
+          >
+            Message Seller
+          </button>
+        )}
+
         {/* Received tab — pending */}
         {tab === "received" && req.status === "PENDING" && (
           <>
@@ -149,6 +170,16 @@ export default function PurchaseRequestsListPage() {
             <p className="font-semibold">Buyer contact</p>
             <p>{req.buyer_first_name} {req.buyer_second_name} · {req.buyer_email}</p>
           </div>
+        )}
+
+        {/* Received tab — message buyer */}
+        {tab === "received" && (req.status === "PENDING" || req.status === "ACCEPTED") && req.buyer_id && (
+          <button
+            onClick={() => handleOpenChat(req.buyer_id, [req.buyer_first_name, req.buyer_second_name].filter(Boolean).join(" ") || "Buyer", req.property_id, req.property_name)}
+            className="text-xs px-4 py-1.5 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition cursor-pointer"
+          >
+            Message Buyer
+          </button>
         )}
 
         {/* Mark as Sold — on any accepted request */}

@@ -122,6 +122,8 @@ export const resolveNotificationRoute = (notification: Notification): string | n
     case "PURCHASE_REQUEST":
     case "REQUEST_ACCEPTED":
     case "REQUEST_REJECTED":
+      return "/purchase-requests";
+
     case "PROPERTY_SOLD":
       return "/my-properties";
 
