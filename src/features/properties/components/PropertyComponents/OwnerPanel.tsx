@@ -38,6 +38,7 @@ export default function OwnerPanel({ property }: Props) {
   const [deleting, setDeleting] = useState(false);
   const [showSponsorshipModal, setShowSponsorshipModal] = useState(false);
 
+  const canManage = property.isVisible !== false && property.listingStatus !== "sold";
   const isSale = property.property_type === "for_sale";
   const saleSubscription = isSale
     ? syncStoredListingSubscriptionWithProperty(property) ?? getStoredListingSubscription(property.propertyId)
@@ -329,13 +330,15 @@ export default function OwnerPanel({ property }: Props) {
         <div className="space-y-2.5">
           {isSale && (
             <>
-              <button
-                type="button"
-                onClick={() => navigate(`/property/${property.propertyId}/subscription`)}
-                className="w-full bg-dark-knight text-white py-3 rounded-full font-bold hover:opacity-90 transition cursor-pointer"
-              >
-                Manage Selling Plan
-              </button>
+              {canManage && (
+                <button
+                  type="button"
+                  onClick={() => navigate(`/property/${property.propertyId}/subscription`)}
+                  className="w-full bg-dark-knight text-white py-3 rounded-full font-bold hover:opacity-90 transition cursor-pointer"
+                >
+                  Manage Selling Plan
+                </button>
+              )}
               {property.listingStatus !== "sold" && (
                 <button
                   type="button"
@@ -357,7 +360,7 @@ export default function OwnerPanel({ property }: Props) {
               Review Rent Requests
             </button>
           )}
-          {property.isVerified && !isSale && !property.isSponsored && (
+          {canManage && property.isVerified && !isSale && !property.isSponsored && (
             <button
               type="button"
               onClick={() => setShowSponsorshipModal(true)}
@@ -384,13 +387,15 @@ export default function OwnerPanel({ property }: Props) {
               </button>
             </>
           )}
-          <button
-            type="button"
-            onClick={() => navigate(`/property/${property.propertyId}/edit`)}
-            className="w-full bg-dark-knight text-white py-3 rounded-full font-bold hover:opacity-90 transition cursor-pointer"
-          >
-            Edit Property
-          </button>
+          {canManage && (
+            <button
+              type="button"
+              onClick={() => navigate(`/property/${property.propertyId}/edit`)}
+              className="w-full bg-dark-knight text-white py-3 rounded-full font-bold hover:opacity-90 transition cursor-pointer"
+            >
+              Edit Property
+            </button>
+          )}
           <button
             type="button"
             onClick={() => navigate("/my-properties")}
@@ -401,10 +406,10 @@ export default function OwnerPanel({ property }: Props) {
           <button
             type="button"
             onClick={handleDelete}
-            disabled={deleting}
+            disabled={deleting || property.isVisible === false}
             className="w-full border border-red-200 text-red-500 py-3 rounded-full font-semibold text-sm hover:bg-red-50 transition cursor-pointer disabled:opacity-50"
           >
-            {deleting ? "Deleting…" : "Delete Property"}
+            {deleting ? "Deleting…" : property.isVisible === false ? "Deleted" : "Delete Property"}
           </button>
         </div>
       </div>

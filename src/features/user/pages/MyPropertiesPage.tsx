@@ -195,44 +195,53 @@ export default function MyPropertiesPage() {
 
                 {/* Actions */}
                 <div className="flex flex-col gap-2 shrink-0 justify-center">
-                  <Link
-                    to={p.property_type === "for_sale"
-                      ? `/buy/property/${p.propertyId}`
-                      : `/rent/property/${p.propertyId}`}
-                    className="text-xs px-3.5 py-1.5 border border-gray-200 rounded-lg font-semibold hover:bg-gray-50 transition text-center"
-                  >
-                    View
-                  </Link>
-                  <button
-                    onClick={() => navigate(`/property/${p.propertyId}/edit`)}
-                    className="text-xs px-3.5 py-1.5 bg-amber-300 text-dark-knight rounded-lg font-bold hover:bg-amber-400 transition"
-                  >
-                    Edit
-                  </button>
-                  {p.property_type === "for_sale" && (
-                    <button
-                      onClick={() => navigate(`/property/${p.propertyId}/subscription`)}
-                      className="text-xs px-3.5 py-1.5 border border-gray-200 rounded-lg font-semibold hover:bg-gray-50 transition"
-                    >
-                      Selling Plan
-                    </button>
-                  )}
-                  {p.isVerified && p.property_type === "for_rent" && !p.isSponsored && (
-                    <button
-                      type="button"
-                      onClick={() => setBoostProperty(p)}
-                      className="text-xs px-3.5 py-1.5 border border-amber-300 bg-amber-50 text-amber-800 rounded-lg font-bold hover:bg-amber-100 transition"
-                    >
-                      Boost
-                    </button>
-                  )}
-                  <button
-                    onClick={() => handleDelete(p.propertyId, p.propertyName)}
-                    disabled={deletingId === p.propertyId || p.isVisible === false}
-                    className="text-xs px-3.5 py-1.5 bg-red-50 text-red-600 rounded-lg font-bold hover:bg-red-100 transition disabled:opacity-50"
-                  >
-                    {deletingId === p.propertyId ? "…" : p.isVisible === false ? "Deleted" : "Delete"}
-                  </button>
+                  {(() => {
+                    const canManage = p.isVisible !== false && p.listingStatus !== "sold";
+                    return (
+                      <>
+                        <Link
+                          to={p.property_type === "for_sale"
+                            ? `/buy/property/${p.propertyId}`
+                            : `/rent/property/${p.propertyId}`}
+                          className="text-xs px-3.5 py-1.5 border border-gray-200 rounded-lg font-semibold hover:bg-gray-50 transition text-center"
+                        >
+                          View
+                        </Link>
+                        {canManage && (
+                          <button
+                            onClick={() => navigate(`/property/${p.propertyId}/edit`)}
+                            className="text-xs px-3.5 py-1.5 bg-amber-300 text-dark-knight rounded-lg font-bold hover:bg-amber-400 transition"
+                          >
+                            Edit
+                          </button>
+                        )}
+                        {canManage && p.property_type === "for_sale" && (
+                          <button
+                            onClick={() => navigate(`/property/${p.propertyId}/subscription`)}
+                            className="text-xs px-3.5 py-1.5 border border-gray-200 rounded-lg font-semibold hover:bg-gray-50 transition"
+                          >
+                            Selling Plan
+                          </button>
+                        )}
+                        {canManage && p.isVerified && p.property_type === "for_rent" && !p.isSponsored && (
+                          <button
+                            type="button"
+                            onClick={() => setBoostProperty(p)}
+                            className="text-xs px-3.5 py-1.5 border border-amber-300 bg-amber-50 text-amber-800 rounded-lg font-bold hover:bg-amber-100 transition"
+                          >
+                            Boost
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDelete(p.propertyId, p.propertyName)}
+                          disabled={deletingId === p.propertyId || p.isVisible === false}
+                          className="text-xs px-3.5 py-1.5 bg-red-50 text-red-600 rounded-lg font-bold hover:bg-red-100 transition disabled:opacity-50"
+                        >
+                          {deletingId === p.propertyId ? "…" : p.isVisible === false ? "Deleted" : "Delete"}
+                        </button>
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
             ))}
