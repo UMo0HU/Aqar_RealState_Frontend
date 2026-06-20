@@ -1,3 +1,4 @@
+import axiosInstance from "@/api/axiosInstance";
 import type { Property, SellingPlanMonths } from "@/types";
 
 export type ListingSubscriptionPaymentState = "UNPAID" | "PENDING" | "PAID";
@@ -113,4 +114,52 @@ export const normalizeStoredSellingPlan = (
 ): SellingPlanMonths | null => {
   const asNumber = Number(value);
   return isValidPlanMonths(asNumber) ? asNumber : null;
+};
+
+export const createSubscriptionForProperty = async (
+  propertyId: number,
+  planMonths: SellingPlanMonths,
+): Promise<ListingSubscriptionRecord | null> => {
+  try {
+    const res = await axiosInstance.post(`/subscription/${propertyId}`, { planMonths });
+    const data = res.data;
+    const record: ListingSubscriptionRecord = {
+      propertyId,
+      subscriptionId: data.subscription_id,
+      propertyName: "",
+      planMonths,
+      amount: Number(data.amount),
+      paymentState: "UNPAID",
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+    saveListingSubscription(record);
+    return record;
+  } catch {
+    return null;
+  }
+};
+
+export const fetchSubscriptionFromApi = async (propertyId: number): Promise<ListingSubscriptionRecord | null> => {
+  try {
+    const res = await axiosInstance.get(`/subscription/${propertyId}`);
+    const data = res.data;
+    const months = normalizeStoredSellingPlan(data.plan_months);
+    if (!months) return null;
+
+    const record: ListingSubscriptionRecord = {
+      propertyId,
+      subscriptionId: data.subscription_id,
+      propertyName: "",
+      planMonths: months,
+      amount: Number(data.amount),
+      paymentState: data.status === "PAID" ? "PAID" : data.status === "PENDING" ? "PENDING" : "UNPAID",
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+    saveListingSubscription(record);
+    return record;
+  } catch {
+    return null;
+  }
 };

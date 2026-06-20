@@ -6,11 +6,14 @@ import NavBar from "@/features/properties/components/NavBar";
 import SellingPlanSelector from "@/features/properties/components/AddPropertyComponents/SellingPlanSelector";
 import { useToast } from "@/context/ToastContext";
 import {
+  createSubscriptionForProperty,
+  fetchSubscriptionFromApi,
   getStoredListingSubscription,
   syncStoredListingSubscriptionWithProperty,
   updateStoredListingSubscriptionState,
   type ListingSubscriptionRecord,
 } from "@/services/listingSubscriptionService";
+import type { SellingPlanMonths } from "@/types";
 import {
   buildSubscriptionPaymentSuccessUrl,
   clearPendingSubscriptionPayment,
@@ -44,6 +47,8 @@ export default function PropertySubscriptionPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [paying, setPaying] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<SellingPlanMonths>(1);
+  const [creating, setCreating] = useState(false);
 
   const loadPage = useCallback(async () => {
     if (!id) {
@@ -68,7 +73,11 @@ export default function PropertySubscriptionPage() {
 
       setProperty(nextProperty);
       const synced = syncStoredListingSubscriptionWithProperty(nextProperty);
-      setSubscription(synced ?? getStoredListingSubscription(nextProperty.propertyId));
+      let sub = synced ?? getStoredListingSubscription(nextProperty.propertyId);
+      if (!sub) {
+        sub = await fetchSubscriptionFromApi(nextProperty.propertyId);
+      }
+      setSubscription(sub);
     } catch (err) {
       setError(
         axios.isAxiosError(err)
@@ -100,6 +109,24 @@ export default function PropertySubscriptionPage() {
 
     return () => window.clearInterval(timer);
   }, [loadPage, uiState]);
+
+  const handleCreateSubscription = async () => {
+    if (!property || creating) return;
+    try {
+      setCreating(true);
+      const sub = await createSubscriptionForProperty(property.propertyId, selectedPlan);
+      if (!sub) {
+        toast.error("Failed to create subscription. Please try again.");
+        return;
+      }
+      setSubscription(sub);
+      toast.success("Subscription created. You can now pay the listing fee.");
+    } catch {
+      toast.error("Failed to create subscription.");
+    } finally {
+      setCreating(false);
+    }
+  };
 
   const handlePay = async () => {
     if (!property || !subscription) return;
@@ -288,11 +315,26 @@ export default function PropertySubscriptionPage() {
                 )}
 
                 {uiState === "missing_subscription" && (
-                  <div className="rounded-2xl border border-gray-200 bg-gray-50 p-5 text-sm text-gray-700">
-                    <p className="font-bold">Subscription record unavailable</p>
-                    <p className="mt-2 leading-relaxed">
-                      This property is verified but we could not recover its unpaid subscription id from the available backend APIs. Payment can only continue if the subscription was previously stored in this browser.
+                  <div className="rounded-2xl border border-gray-200 bg-white p-5">
+                    <p className="text-sm font-bold text-gray-900">No subscription yet</p>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Choose a selling plan to activate this property for buyers.
                     </p>
+                    <div className="mt-4">
+                      <SellingPlanSelector
+                        value={selectedPlan}
+                        onChange={setSelectedPlan}
+                        disabled={false}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleCreateSubscription}
+                      disabled={creating}
+                      className="mt-4 rounded-xl bg-dark-knight px-6 py-3 text-sm font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+                    >
+                      {creating ? "Creating…" : "Create Subscription"}
+                    </button>
                   </div>
                 )}
 
