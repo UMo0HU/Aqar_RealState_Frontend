@@ -21,7 +21,7 @@ export default function RentDueBanner() {
   const activeNotification = useMemo(() => {
     const actionable = notifications.filter((notification) => {
       const metadata = parseNotificationMetadata(notification.metadata);
-      return ACTIONABLE_TYPES.has(notification.event_type) && metadata.invoice_id;
+      return !notification.viewed && ACTIONABLE_TYPES.has(notification.event_type) && metadata.invoice_id;
     });
 
     return actionable.find((notification) => notification.event_type === "PAYMENT_OVERDUE")

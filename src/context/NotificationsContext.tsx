@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from "react";
 
-import { getSocket } from "@/api/socket";
+import { connectSocket, getSocket } from "@/api/socket";
 import { useAuth } from "@/context/AuthContext";
 import {
   getAllNotifications,
@@ -34,7 +34,7 @@ interface NotificationsContextValue {
 const NotificationsContext = createContext<NotificationsContextValue | null>(null);
 
 export function NotificationsProvider({ children }: { children: ReactNode }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, token } = useAuth();
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -97,7 +97,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    const socket = getSocket();
+    const socket = getSocket() ?? (token ? connectSocket(token) : null);
     if (!socket) return;
 
     const handleNewNotification = (incoming: Record<string, unknown>) => {

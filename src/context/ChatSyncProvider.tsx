@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 
-import { getSocket } from "@/api/socket";
+import { connectSocket, getSocket } from "@/api/socket";
 import { useAuth } from "@/context/AuthContext";
 import {
   getInbox,
@@ -21,7 +21,7 @@ const ChatSyncContext = createContext<ChatSyncValue>({
 export const useChatSync = () => useContext(ChatSyncContext);
 
 export function ChatSyncProvider({ children }: { children: ReactNode }) {
-  const { isAuthenticated, userInfo } = useAuth();
+  const { isAuthenticated, userInfo, token } = useAuth();
   const [unreadChatCount, setUnreadChatCount] = useState(0);
 
   const refreshInboxCount = useCallback(async () => {
@@ -44,7 +44,7 @@ export function ChatSyncProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!isAuthenticated || !userInfo?.id) return;
 
-    const socket = getSocket();
+    const socket = getSocket() ?? (token ? connectSocket(token) : null);
     if (!socket) return;
 
     const handleIncomingMessage = (message: SocketChatMessage) => {
