@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 
 import NavBar from "@/features/properties/components/NavBar";
-import { getBalance, requestWithdrawal } from "@/services/paymentService";
+import {
+  getBalance,
+  getTransactionHistory,
+  requestWithdrawal,
+} from "@/services/paymentService";
+import type { Transaction } from "@/services/paymentService";
 import { useToast } from "@/context/ToastContext";
 import { getApiErrorMessage } from "@/utils/apiError";
 
@@ -9,7 +14,13 @@ export default function WalletPage() {
   const toast = useToast();
 
   const [balance, setBalance] = useState<string | null>(null);
+  const [lockedFunds, setLockedFunds] = useState<string | null>(null);
+  const [availableBalance, setAvailableBalance] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [txLoading, setTxLoading] = useState(true);
+
   const [showModal, setShowModal] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [withdrawMethod, setWithdrawMethod] = useState("bank_transfer");
@@ -17,13 +28,27 @@ export default function WalletPage() {
   const [receiverError, setReceiverError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
+  const fetchBalance = () =>
     getBalance()
-      .then((res) => setBalance(res.data.balance))
+      .then((res) => {
+        setBalance(res.data.balance);
+        setLockedFunds(res.data.lockedFunds ?? null);
+        setAvailableBalance(res.data.availableBalance ?? null);
+      })
       .catch((err) => {
         const msg = getApiErrorMessage(err, "Could not load balance.");
         toast.error(msg);
-      })
+      });
+
+  const fetchTransactions = () =>
+    getTransactionHistory()
+      .then((res) => setTransactions(res.data.transactions))
+      .catch(() => {})
+      .finally(() => setTxLoading(false));
+
+  useEffect(() => {
+    Promise.all([fetchBalance(), fetchTransactions()])
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
@@ -37,7 +62,6 @@ export default function WalletPage() {
         return "Invalid wallet number. Must be 11 digits starting with 01 (e.g. 01012345678).";
       }
     } else {
-      // bank_transfer or card — minimum 10 digits
       const digitsOnly = trimmed.replace(/\D/g, "");
       if (digitsOnly.length < 10) {
         return "Account number must be at least 10 digits.";
@@ -53,7 +77,6 @@ export default function WalletPage() {
 
   const handleMethodChange = (method: string) => {
     setWithdrawMethod(method);
-    // Re-validate current receiver with new method
     setReceiverError(validateReceiver(withdrawReceiver, method));
   };
 
@@ -61,6 +84,11 @@ export default function WalletPage() {
     const amountNum = parseFloat(withdrawAmount);
     if (!Number.isFinite(amountNum) || amountNum <= 0) {
       toast.error("Enter a valid positive amount.");
+      return;
+    }
+
+    if (availableBalance !== null && amountNum > parseFloat(availableBalance)) {
+      toast.error("Amount exceeds your available balance.");
       return;
     }
 
@@ -79,8 +107,7 @@ export default function WalletPage() {
       setWithdrawAmount("");
       setWithdrawReceiver("");
 
-      const res = await getBalance();
-      setBalance(res.data.balance);
+      await Promise.all([fetchBalance(), fetchTransactions()]);
     } catch (err) {
       toast.error(getApiErrorMessage(err, "Withdrawal failed."));
     } finally {
@@ -104,15 +131,35 @@ export default function WalletPage() {
             ) : (
               <div className="space-y-6">
                 <div className="rounded-2xl bg-gradient-to-br from-dark-knight to-slate-700 p-6 text-white">
-                  <p className="text-sm font-medium text-amber-300 uppercase tracking-wide">Current Balance</p>
+                  <p className="text-sm font-medium text-amber-300 uppercase tracking-wide">Total Balance</p>
                   <p className="mt-2 text-4xl font-extrabold">
-                    {balance !== null ? `${parseFloat(balance).toLocaleString()} EGP` : "—"}
+                    {balance !== null ? `${parseFloat(balance).toLocaleString("en-GB")} EGP` : "—"}
                   </p>
+
+                  <div className="mt-4 pt-4 border-t border-white/20 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-white/70">Available for Withdrawal</p>
+                      <p className="text-lg font-bold text-emerald-300">
+                        {availableBalance !== null
+                          ? `${parseFloat(availableBalance).toLocaleString("en-GB")} EGP`
+                          : "—"}
+                      </p>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-white/70">Locked for Upcoming Rentals</p>
+                      <p className="text-sm font-semibold text-white/50">
+                        {lockedFunds !== null
+                          ? `${parseFloat(lockedFunds).toLocaleString("en-GB")} EGP`
+                          : "—"}
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
                 <button
                   type="button"
                   onClick={() => setShowModal(true)}
+                  disabled={availableBalance !== null && parseFloat(availableBalance) <= 0}
                   className="w-full bg-dark-knight text-white py-3 rounded-xl font-bold hover:opacity-90 transition disabled:opacity-50"
                 >
                   Withdraw
@@ -120,9 +167,81 @@ export default function WalletPage() {
               </div>
             )}
           </div>
+
+          {/* Transaction History */}
+          <div className="bg-white rounded-2xl shadow-md p-8">
+            <h2 className="text-lg font-bold text-gray-900 mb-4">Transaction History</h2>
+            {txLoading ? (
+              <div className="flex justify-center py-6">
+                <div className="w-6 h-6 border-4 border-dark-knight border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : transactions.length === 0 ? (
+              <p className="text-sm text-gray-400 text-center py-6">No transactions yet.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-gray-400 text-xs uppercase tracking-wide border-b border-gray-100">
+                      <th className="pb-2 pr-4 font-semibold">Date</th>
+                      <th className="pb-2 pr-4 font-semibold">Type</th>
+                      <th className="pb-2 font-semibold text-right">Amount</th>
+                      <th className="pb-2 font-semibold text-right">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {transactions.map((tx) => (
+                      <tr key={tx.payment_id} className="hover:bg-gray-50/50">
+                        <td className="py-3 pr-4 text-gray-500 whitespace-nowrap">
+                          {new Date(tx.created_at).toLocaleDateString("en-GB", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </td>
+                        <td className="py-3 pr-4">
+                          <span
+                            className={`inline-block text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                              tx.payment_type === "rent"
+                                ? "bg-green-100 text-green-700"
+                                : tx.payment_type === "withdraw"
+                                  ? "bg-blue-100 text-blue-700"
+                                  : "bg-amber-100 text-amber-700"
+                            }`}
+                          >
+                            {tx.payment_type === "rent"
+                              ? "Rent"
+                              : tx.payment_type === "withdraw"
+                                ? "Withdrawal"
+                                : "Refund"}
+                          </span>
+                        </td>
+                        <td className="py-3 text-right font-semibold tabular-nums whitespace-nowrap">
+                          {parseFloat(tx.value).toLocaleString("en-GB")} EGP
+                        </td>
+                        <td className="py-3 text-right whitespace-nowrap">
+                          <span
+                            className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                              tx.status === "succeeded"
+                                ? "bg-green-100 text-green-700"
+                                : tx.status === "pending"
+                                  ? "bg-yellow-100 text-yellow-700"
+                                  : "bg-red-100 text-red-600"
+                            }`}
+                          >
+                            {tx.status.charAt(0).toUpperCase() + tx.status.slice(1)}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
+      {/* Withdrawal Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl space-y-5">
@@ -130,7 +249,7 @@ export default function WalletPage() {
               <div>
                 <h2 className="text-xl font-bold text-gray-900">Withdraw Funds</h2>
                 <p className="mt-1 text-sm text-gray-500">
-                  Balance: {balance !== null ? `${parseFloat(balance).toLocaleString()} EGP` : "—"}
+                  Available: {availableBalance !== null ? `${parseFloat(availableBalance).toLocaleString("en-GB")} EGP` : "—"}
                 </p>
               </div>
               <button
@@ -146,7 +265,9 @@ export default function WalletPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Amount (EGP)</label>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                Amount (EGP)
+              </label>
               <input
                 type="number"
                 min="1"
@@ -156,6 +277,9 @@ export default function WalletPage() {
                 placeholder="e.g. 500"
                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-dark-knight focus:ring-1 focus:ring-dark-knight transition"
               />
+              <p className="mt-1 text-xs text-gray-400">
+                Max: {availableBalance !== null ? `${parseFloat(availableBalance).toLocaleString("en-GB")} EGP` : "—"}
+              </p>
             </div>
 
             <div>
@@ -172,11 +296,17 @@ export default function WalletPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Receiver Details</label>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                Receiver Details
+              </label>
               <textarea
                 value={withdrawReceiver}
                 onChange={(e) => handleReceiverChange(e.target.value)}
-                placeholder={withdrawMethod === "wallet" ? "Phone number (e.g. 01012345678)" : "Bank account number (min 10 digits)"}
+                placeholder={
+                  withdrawMethod === "wallet"
+                    ? "Phone number (e.g. 01012345678)"
+                    : "Bank account number (min 10 digits)"
+                }
                 rows={3}
                 className={`w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none transition resize-none ${
                   receiverError
@@ -184,9 +314,7 @@ export default function WalletPage() {
                     : "border-gray-200 focus:border-dark-knight focus:ring-1 focus:ring-dark-knight"
                 }`}
               />
-              {receiverError && (
-                <p className="mt-1 text-xs text-red-500">{receiverError}</p>
-              )}
+              {receiverError && <p className="mt-1 text-xs text-red-500">{receiverError}</p>}
             </div>
 
             <div className="flex gap-3 pt-2">

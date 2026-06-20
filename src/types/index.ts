@@ -164,6 +164,21 @@ export interface Notification {
   created_at:        string;
 }
 
+// ─── Transaction / Payment Intent ─────────────────────────────────────────────
+export type PaymentType = "rent" | "withdraw" | "refund";
+export type PaymentStatus = "pending" | "succeeded" | "failed" | "canceled";
+
+export interface Transaction {
+  payment_id:     string;
+  property_id:    number | null;
+  payment_type:   PaymentType;
+  value:          string;
+  payment_method: string;
+  status:         PaymentStatus;
+  transfer_id:    string | null;
+  created_at:     string;
+}
+
 // ─── User Profile ─────────────────────────────────────────────────────────────
 export interface UserProfile {
   first_name:  string;

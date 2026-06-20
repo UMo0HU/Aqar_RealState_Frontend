@@ -183,11 +183,27 @@ export const clearPendingInvoicePayment = () => {
 export interface BalanceResponse {
   success: boolean;
   balance: string;
+  lockedFunds?: string;
+  availableBalance?: string;
   currency: string;
+}
+
+export interface Transaction {
+  payment_id:     string;
+  property_id:    number | null;
+  payment_type:   "rent" | "withdraw" | "refund";
+  value:          string;
+  payment_method: string;
+  status:         "pending" | "succeeded" | "failed" | "canceled";
+  transfer_id:    string | null;
+  created_at:     string;
 }
 
 export const getBalance = () =>
   axios.get<BalanceResponse>("/api/balance");
+
+export const getTransactionHistory = () =>
+  axios.get<{ success: boolean; transactions: Transaction[] }>("/api/payment/transactions");
 
 export const requestWithdrawal = (amount: number, method: string, receiverData: string) => {
   return axios.post("/api/payment/request-withdrawal", { amount, method, receiverData, property_id: null });
