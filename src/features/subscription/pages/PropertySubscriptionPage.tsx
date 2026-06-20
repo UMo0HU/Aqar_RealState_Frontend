@@ -73,10 +73,8 @@ export default function PropertySubscriptionPage() {
 
       setProperty(nextProperty);
       const synced = syncStoredListingSubscriptionWithProperty(nextProperty);
-      let sub = synced ?? getStoredListingSubscription(nextProperty.propertyId);
-      if (!sub) {
-        sub = await fetchSubscriptionFromApi(nextProperty.propertyId);
-      }
+      const stored = synced ?? getStoredListingSubscription(nextProperty.propertyId);
+      const sub = stored ?? await fetchSubscriptionFromApi(nextProperty.propertyId);
       setSubscription(sub);
     } catch (err) {
       setError(
