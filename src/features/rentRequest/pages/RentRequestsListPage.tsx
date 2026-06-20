@@ -10,7 +10,7 @@ import {
   rejectRentRequest,
   cancelRentRequest,
 } from "@/services/rentRequestService";
-import { requestRefund } from "@/services/paymentService";
+import { requestRefund, cancelRefundRequest } from "@/services/paymentService";
 import { useToast }       from "@/context/ToastContext";
 import type { RentRequest } from "@/types";
 
@@ -197,6 +197,23 @@ export default function RentRequestsListPage() {
             className="text-xs px-4 py-1.5 bg-dark-knight text-white rounded-lg font-bold hover:opacity-90 transition"
           >
             Pay Now →
+          </button>
+        )}
+
+        {tab === "sent" && req.request_state === "REFUND_REQUESTED" && (
+          <button
+            onClick={async () => {
+              try {
+                await cancelRefundRequest(req.request_id);
+                toast.success("Refund request cancelled.");
+                load();
+              } catch {
+                toast.error("Failed to cancel refund request.");
+              }
+            }}
+            className="text-xs px-4 py-1.5 bg-gray-500 text-white rounded-lg font-bold hover:opacity-90 transition cursor-pointer"
+          >
+            Cancel Refund Request
           </button>
         )}
 

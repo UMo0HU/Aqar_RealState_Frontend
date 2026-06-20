@@ -195,3 +195,6 @@ export const requestWithdrawal = (amount: number, method: string, receiverData: 
 
 export const requestRefund = (requestId: string, reason?: string) =>
   axios.post("/api/payment/request-refund", { request_id: requestId, reason });
+
+export const cancelRefundRequest = (requestId: string) =>
+  axios.post("/api/payment/cancel-refund-request", { request_id: requestId });
