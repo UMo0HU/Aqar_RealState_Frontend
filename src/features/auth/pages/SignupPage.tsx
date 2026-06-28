@@ -4,7 +4,6 @@ import axios from "axios";
 
 import Form from "../components/Form";
 import FormContainer from "../components/FormContainer";
-import FormDivider from "../components/FormDivider";
 import Header from "../components/Header";
 import Input from "../components/Input";
 import SubmitButton from "../components/SubmitButton";

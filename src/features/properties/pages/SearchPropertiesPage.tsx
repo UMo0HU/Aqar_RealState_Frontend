@@ -27,7 +27,7 @@ function readMode(sp: URLSearchParams): SearchMode {
 }
 
 export default function SearchPropertiesPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const navigate       = useNavigate();
   const toast          = useToast();
   const toastRef       = useRef(toast);
