@@ -1,5 +1,6 @@
 import type { Property } from "@/types";
 import { resolveImageUrl } from "@/services/propertyService";
+import { fetchEventSource } from "@microsoft/fetch-event-source";
 
 // ─── Session Management ──────────────────────────────────────────────────────
 const SESSION_KEY = "aqar_ai_session_id";
@@ -175,4 +176,47 @@ export interface RecommendPayload {
 export const recommendSimilarProperties = async (payload: RecommendPayload) => {
   const data = await postAi("/recommend/similar", payload);
   return data;
+};
+
+// ─── SSE Chat Stream ─────────────────────────────────────────────────────────
+interface StreamCallbacks {
+  onToken: (text: string) => void;
+  onProperties: (properties: any[]) => void;
+  onDone: () => void;
+  onError: (err: any) => void;
+}
+
+export const streamAiChatMessage = async (
+  sessionId: string,
+  message: string,
+  callbacks: StreamCallbacks
+) => {
+  const ctrl = new AbortController();
+
+  await fetchEventSource(`${AI_BASE_URL}/chat/stream`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "text/event-stream",
+    },
+    body: JSON.stringify({ message, session_id: sessionId }),
+    signal: ctrl.signal,
+
+    onmessage(ev) {
+      if (ev.event === "token") {
+        const data = JSON.parse(ev.data);
+        callbacks.onToken(data.text);
+      } else if (ev.event === "properties") {
+        const data = JSON.parse(ev.data);
+        callbacks.onProperties(data.properties);
+      } else if (ev.event === "done") {
+        callbacks.onDone();
+      }
+    },
+    onerror(err) {
+      callbacks.onError(err);
+      ctrl.abort();
+      throw err;
+    },
+  });
 };

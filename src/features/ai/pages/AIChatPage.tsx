@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useToast } from "@/context/ToastContext";
-import { sendAiChatMessage, getAiSessionId, resetAiSessionId } from "@/services/aiService";
+import { streamAiChatMessage, getAiSessionId, resetAiSessionId } from "@/services/aiService";
 import { getApiErrorMessage } from "@/utils/apiError";
 import { BASE_URL } from "@/api/axiosInstance";
 import type { AIChatProperty } from "@/types/ai";
@@ -36,11 +36,48 @@ export default function AIChatPage() {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
+  const aiMessageIdRef = useRef<string | null>(null);
+  const charBufferRef = useRef<string[]>([]);
+  const charTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const streamDoneRef = useRef(false);
+
+  const stopCharInterval = () => {
+    if (charTimerRef.current !== null) {
+      clearInterval(charTimerRef.current);
+      charTimerRef.current = null;
+    }
+  };
+
+  const outputNextChar = () => {
+    if (charBufferRef.current.length === 0) {
+      if (streamDoneRef.current) {
+        stopCharInterval();
+        setSending(false);
+      }
+      return;
+    }
+    const char = charBufferRef.current.shift()!;
+    const id = aiMessageIdRef.current;
+    if (!id) return;
+    setMessages((prev) => {
+      const existing = prev.find((m) => m.id === id);
+      if (existing) {
+        return prev.map((msg) =>
+          msg.id === id ? { ...msg, content: msg.content + char } : msg
+        );
+      }
+      return [...prev, { id, role: "assistant", content: char, properties: [] }];
+    });
+  };
 
   useEffect(() => {
     localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(messages.slice(-50)));
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, sending]);
+
+  useEffect(() => {
+    return () => stopCharInterval();
+  }, []);
 
   const handleClearChat = () => {
     setMessages([]);
@@ -54,25 +91,59 @@ export default function AIChatPage() {
     if (!text || sending) return;
 
     const userMessage: ChatMessage = { id: Date.now().toString(), role: "user", content: text };
+    const aiMessageId = Date.now().toString() + "-ai";
+    aiMessageIdRef.current = aiMessageId;
+    stopCharInterval();
+    charBufferRef.current = [];
+    streamDoneRef.current = false;
+
     setMessages((current) => [...current, userMessage]);
     setInput("");
     setSending(true);
 
     try {
-      const response = await sendAiChatMessage(sessionId, text);
-
-      setMessages((current) => [
-        ...current,
-        {
-          id: Date.now().toString() + "-ai",
-          role: "assistant",
-          content: response.answer || "No response text received.",
-          properties: response.properties || [],
+      await streamAiChatMessage(sessionId, text, {
+        onToken: (chunk) => {
+          for (const char of chunk) {
+            charBufferRef.current.push(char);
+          }
+          if (!charTimerRef.current) {
+            charTimerRef.current = setInterval(outputNextChar, 30);
+          }
         },
-      ]);
+        onProperties: (properties) => {
+          const id = aiMessageIdRef.current;
+          if (!id) return;
+          setMessages((prev) => {
+            const existing = prev.find((m) => m.id === id);
+            if (existing) {
+              return prev.map((msg) =>
+                msg.id === id ? { ...msg, properties: properties as AIChatProperty[] } : msg
+              );
+            }
+            return [...prev, { id, role: "assistant", content: "", properties: properties as AIChatProperty[] }];
+          });
+        },
+        onDone: () => {
+          streamDoneRef.current = true;
+        },
+        onError: () => {
+          charBufferRef.current = [];
+          stopCharInterval();
+          setSending(false);
+        },
+      });
     } catch (error) {
+      charBufferRef.current = [];
+      stopCharInterval();
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === aiMessageIdRef.current && msg.content === ""
+            ? { ...msg, content: "Sorry, the AI assistant encountered an error." }
+            : msg
+        )
+      );
       toast.error(getApiErrorMessage(error, "AI assistant is unavailable."));
-    } finally {
       setSending(false);
     }
   };
@@ -186,7 +257,7 @@ export default function AIChatPage() {
             </div>
           ))}
 
-          {sending && (
+          {sending && !messages.some((m) => m.id === aiMessageIdRef.current) && (
             <div className="flex justify-start">
               <div className="bg-white border border-gray-200 px-6 py-4 rounded-3xl rounded-bl-sm text-gray-500 shadow-sm flex items-center gap-2">
                 <span className="w-2 h-2 bg-dark-knight rounded-full animate-bounce"></span>

@@ -40,6 +40,7 @@ Dockerfile
 eslint.config.js
 index.html
 package.json
+public/.well-known/assetlinks.json
 public/vite.svg
 README.md
 src/api/axiosInstance.ts
@@ -302,6 +303,8 @@ export default defineConfig([
   "dependencies": {
     "@mapbox/mapbox-gl-geocoder": "^5.1.2",
     "@tailwindcss/vite": "^4.1.16",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "axios": "^1.13.2",
     "date-fns": "^4.1.0",
     "leaflet": "^1.9.4",
@@ -335,6 +338,22 @@ export default defineConfig([
     "vite": "^7.1.7"
   }
 }
+````
+
+## File: public/.well-known/assetlinks.json
+````json
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.example.aqar",
+      "sha256_cert_fingerprints": [
+        "2D:DC:E0:D9:EE:98:5D:CC:B4:CF:71:3B:B6:4A:63:26:DD:8D:9C:5F:C8:32:EF:EB:2A:00:9F:87:CA:D4:CA:C4"
+      ]
+    }
+  }
+]
 ````
 
 ## File: public/vite.svg
@@ -529,6 +548,8 @@ export const getAuthToken = () => token;
 ````typescript
 import { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
+import { SpeedInsights } from "@vercel/speed-insights/react";
+import { Analytics } from "@vercel/analytics/react";
 
 import { AuthContextProvider } from "@/context/AuthContext";
 import { ChatSyncProvider }     from "@/context/ChatSyncProvider";
@@ -654,6 +675,8 @@ export default function App() {
       <ChatSyncProvider>
         <NotificationsProvider>
           <AppContent />
+          <SpeedInsights />
+          <Analytics />
         </NotificationsProvider>
       </ChatSyncProvider>
     </AuthContextProvider>
@@ -2035,7 +2058,6 @@ import Card from "../components/Card";
 import CreateAccount from "../components/CreateAccount";
 import Form from "../components/Form";
 import FormContainer from "../components/FormContainer";
-import FormDivider from "../components/FormDivider";
 import Header from "../components/Header";
 import Input from "../components/Input";
 import SubmitButton from "../components/SubmitButton";
@@ -2242,7 +2264,6 @@ import axios from "axios";
 
 import Form from "../components/Form";
 import FormContainer from "../components/FormContainer";
-import FormDivider from "../components/FormDivider";
 import Header from "../components/Header";
 import Input from "../components/Input";
 import SubmitButton from "../components/SubmitButton";
@@ -9998,7 +10019,7 @@ function readMode(sp: URLSearchParams): SearchMode {
 }
 
 export default function SearchPropertiesPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const navigate       = useNavigate();
   const toast          = useToast();
   const toastRef       = useRef(toast);
@@ -10266,8 +10287,6 @@ export default function SearchPropertiesPage() {
                     value={draftQuery}
                     onQueryChange={setDraftQuery}
                     onSearch={handleSmartSearch}
-                    onDebouncedSearch={handleSmartSearch}
-                    debounceMs={400}
                     placeholder="Describe what you want…"
                   />
                 </div>
@@ -13160,7 +13179,7 @@ export default function WalletPage() {
               </div>
             ) : (
               <div className="space-y-6">
-                <div className="rounded-2xl bg-linear-to-br from-dark-knight to-slate-700 p-6 text-white">
+                <div className="rounded-2xl bg-gradient-to-br from-dark-knight to-slate-700 p-6 text-white">
                   <p className="text-sm font-medium text-amber-300 uppercase tracking-wide">Total Balance</p>
                   <p className="mt-2 text-4xl font-extrabold">
                     {balance !== null ? `${parseFloat(balance).toLocaleString("en-GB")} EGP` : "—"}

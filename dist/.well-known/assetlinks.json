@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.example.aqar",
+      "sha256_cert_fingerprints": [
+        "2D:DC:E0:D9:EE:98:5D:CC:B4:CF:71:3B:B6:4A:63:26:DD:8D:9C:5F:C8:32:EF:EB:2A:00:9F:87:CA:D4:CA:C4"
+      ]
+    }
+  }
+]
