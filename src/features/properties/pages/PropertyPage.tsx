@@ -93,7 +93,7 @@ const PropertyPage = () => {
               seedPropertyId={property.propertyId}
               excludePropertyId={property.propertyId}
               title="Similar Properties"
-              description="AI matches with nearby fit and listing details."
+              description={property.propertyDesc || property.propertyName || ""}
             />
             <MortgageCalculator property={property} />
           </div>

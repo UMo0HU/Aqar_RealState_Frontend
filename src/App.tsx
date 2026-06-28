@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 
 import { AuthContextProvider } from "@/context/AuthContext";
@@ -15,6 +16,7 @@ import SearchPropertiesPage from "@/features/properties/pages/SearchPropertiesPa
 import PropertiesPage       from "@/features/properties/pages/PropertiesPage";
 import ReviewPage           from "@/features/properties/pages/ReviewPage";
 import AIChatPage           from "@/features/ai/pages/AIChatPage";
+import { pingAiService }    from "@/services/aiService";
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 import AuthLayout            from "@/features/auth/AuthLayout";
@@ -56,6 +58,10 @@ import NewChatPage    from "@/features/chat/pages/NewChatPage";
 
 function AppContent() {
   useAuthGuard();
+
+  useEffect(() => {
+    pingAiService();
+  }, []);
 
   return (
     <>

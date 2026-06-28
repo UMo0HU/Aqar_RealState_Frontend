@@ -8,7 +8,6 @@ import FormContainer from "../components/FormContainer";
 import FormDivider from "../components/FormDivider";
 import Header from "../components/Header";
 import Input from "../components/Input";
-import OAuthOptions from "../components/OAuthOptions";
 import SubmitButton from "../components/SubmitButton";
 
 import { FormContext } from "@/context/FormContext";
@@ -113,8 +112,6 @@ export default function LoginPage() {
           </section>
           <SubmitButton>Login</SubmitButton>
           <p className="text-red-500 font-semibold">{errorMsg}</p>
-          <FormDivider>Or Login with</FormDivider>
-          <OAuthOptions />
           <CreateAccount />
         </Form>
       </FormContainer>

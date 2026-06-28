@@ -5,8 +5,10 @@ import { useToast } from "@/context/ToastContext";
 import { useFavIds } from "@/hooks/useFavIds";
 import { recommendSimilarProperties, getAiSessionId } from "@/services/aiService";
 import type { Property } from "@/types";
+import type { AIChatProperty } from "@/types/ai";
 import { getApiErrorMessage } from "@/utils/apiError";
 import { isPubliclyVisibleProperty } from "@/utils/propertyListing";
+import { resolveImageUrl } from "@/services/propertyService";
 
 interface Props {
   seedPropertyId: number | string | null;
@@ -48,8 +50,41 @@ export default function RecommendedPropertiesRow({
 
         if (cancelled) return;
 
+        const propertiesArray = results?.properties || [];
+
+        const standardizedProperties: Property[] = propertiesArray.map((prop: AIChatProperty) => ({
+          propertyId: prop.id || prop.property_id,
+          ownerId: prop.owner_id || "",
+          propertyName: prop.title || prop.property_name,
+          propertyDesc: prop.description || prop.property_desc,
+          location: prop.location,
+          pricePerDay: prop.price_per_day || (prop.price ? prop.price / 30 : 0),
+          priceValue: prop.price_value || prop.price,
+          pricingUnit: prop.pricing_unit || "MONTH",
+          size: String(prop.size),
+          bedroomsNumber: prop.bedrooms || prop.bedrooms_no,
+          bedsNumber: prop.beds_no || prop.bedrooms || 1,
+          bathroomsNumber: prop.bathrooms || prop.bathrooms_no,
+          images: Array.isArray(prop.images) ? prop.images.map(resolveImageUrl) : prop.image_url ? [resolveImageUrl(prop.image_url)] : [],
+          ownershipProof: [],
+          isAvailable: prop.is_available ?? true,
+          isVerified: prop.is_verified ?? true,
+          isVisible: prop.is_visible ?? true,
+          is_furnished: prop.is_furnished ?? false,
+          isSponsored: prop.is_sponsored ?? false,
+          property_type: prop.property_type || "for_rent",
+          listingStatus: prop.listing_status || "active",
+          listingExpiry: prop.listing_expiry || null,
+          rate: prop.rate || null,
+          latitude: prop.latitude,
+          longitude: prop.longitude,
+          owner_first_name: prop.owner_first_name,
+          owner_second_name: prop.owner_second_name,
+          owner_email: prop.owner_email,
+        }));
+
         setProperties(
-          results
+          standardizedProperties
             .filter((property) => property.propertyId !== excludePropertyId)
             .filter(isPubliclyVisibleProperty)
             .slice(0, 8),

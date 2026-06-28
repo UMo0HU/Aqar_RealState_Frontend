@@ -54,7 +54,7 @@ const HomePage = () => {
 
   const handleSearch = (q: string) => {
     if (!q.trim()) return;
-    navigate(`/search?q=${encodeURIComponent(q.trim())}`);
+    navigate(`/search?mode=smart&q=${encodeURIComponent(q.trim())}`);
   };
 
   const handleFavChange = (propertyId: number, next: boolean) => {

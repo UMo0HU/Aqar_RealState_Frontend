@@ -7,7 +7,6 @@ import FormContainer from "../components/FormContainer";
 import FormDivider from "../components/FormDivider";
 import Header from "../components/Header";
 import Input from "../components/Input";
-import OAuthOptions from "../components/OAuthOptions";
 import SubmitButton from "../components/SubmitButton";
 
 import { FormContext } from "@/context/FormContext";
@@ -53,8 +52,6 @@ export default function SignupPage () {
                 <p className="text-[16px] sm:text-xl tracking-tighter">
                     Already have an account ? <Link to="/auth/login" className="text-gray-600 ms-2 hover:text-gray-400 transition-colors delay-100">Login</Link>
                 </p>
-                <FormDivider>Or sign up with</FormDivider>
-                <OAuthOptions />
                 <SubmitButton>Sign Up</SubmitButton>
             </Form>
         </FormContainer>
