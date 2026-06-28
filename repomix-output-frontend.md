@@ -9104,7 +9104,7 @@ export default function SearchFilterPanel({ initial, onApply, onClear }: Props) 
         <div>
           <label className={labelClass}>Location</label>
           <input type="text" value={location} onChange={(e) => setLocation(e.target.value)}
-            placeholder="City or area…" className={`${inputClass} min-w-[160px]`} />
+            placeholder="City or area…" className={`${inputClass} min-w-40`} />
         </div>
 
         {/* Price Range */}
@@ -13160,7 +13160,7 @@ export default function WalletPage() {
               </div>
             ) : (
               <div className="space-y-6">
-                <div className="rounded-2xl bg-gradient-to-br from-dark-knight to-slate-700 p-6 text-white">
+                <div className="rounded-2xl bg-linear-to-br from-dark-knight to-slate-700 p-6 text-white">
                   <p className="text-sm font-medium text-amber-300 uppercase tracking-wide">Total Balance</p>
                   <p className="mt-2 text-4xl font-extrabold">
                     {balance !== null ? `${parseFloat(balance).toLocaleString("en-GB")} EGP` : "—"}

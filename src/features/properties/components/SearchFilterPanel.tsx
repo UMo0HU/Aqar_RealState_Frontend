@@ -127,7 +127,7 @@ export default function SearchFilterPanel({ initial, onApply, onClear }: Props) 
         <div>
           <label className={labelClass}>Location</label>
           <input type="text" value={location} onChange={(e) => setLocation(e.target.value)}
-            placeholder="City or area…" className={`${inputClass} min-w-[160px]`} />
+            placeholder="City or area…" className={`${inputClass} min-w-40`} />
         </div>
 
         {/* Price Range */}

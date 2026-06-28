@@ -295,8 +295,6 @@ export default function SearchPropertiesPage() {
                     value={draftQuery}
                     onQueryChange={setDraftQuery}
                     onSearch={handleSmartSearch}
-                    onDebouncedSearch={handleSmartSearch}
-                    debounceMs={400}
                     placeholder="Describe what you want…"
                   />
                 </div>
