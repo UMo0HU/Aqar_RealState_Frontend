@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import { Analytics } from "@vercel/analytics/react";
 
 import { AuthContextProvider } from "@/context/AuthContext";
 import { ChatSyncProvider }     from "@/context/ChatSyncProvider";
@@ -127,6 +128,7 @@ export default function App() {
         <NotificationsProvider>
           <AppContent />
           <SpeedInsights />
+          <Analytics />
         </NotificationsProvider>
       </ChatSyncProvider>
     </AuthContextProvider>
