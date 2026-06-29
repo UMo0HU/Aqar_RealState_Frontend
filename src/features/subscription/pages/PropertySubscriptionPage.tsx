@@ -72,10 +72,13 @@ export default function PropertySubscriptionPage() {
       }
 
       setProperty(nextProperty);
-      const synced = syncStoredListingSubscriptionWithProperty(nextProperty);
-      const stored = synced ?? getStoredListingSubscription(nextProperty.propertyId);
-      const sub = stored ?? await fetchSubscriptionFromApi(nextProperty.propertyId);
-      setSubscription(sub);
+      const stored = syncStoredListingSubscriptionWithProperty(nextProperty)
+        ?? getStoredListingSubscription(nextProperty.propertyId);
+      let sub: ListingSubscriptionRecord | null = null;
+      if (stored?.paymentState === "PENDING") {
+        sub = await fetchSubscriptionFromApi(nextProperty.propertyId);
+      }
+      setSubscription(sub ?? stored);
     } catch (err) {
       setError(
         axios.isAxiosError(err)
@@ -351,7 +354,20 @@ export default function PropertySubscriptionPage() {
                   {uiState === "payment_pending" && (
                     <button
                       type="button"
-                      onClick={() => loadPage()}
+                      onClick={async () => {
+                        if (!property) return;
+                        const sub = await fetchSubscriptionFromApi(property.propertyId);
+                        if (sub) {
+                          setSubscription(sub);
+                          if (sub.paymentState === "UNPAID") {
+                            toast.info("Payment was not completed. You can try again.");
+                          } else if (sub.paymentState === "PAID") {
+                            toast.success("Payment confirmed!");
+                          }
+                        } else {
+                          loadPage();
+                        }
+                      }}
                       className="rounded-xl bg-dark-knight px-6 py-3 text-sm font-bold text-white transition hover:opacity-90 cursor-pointer"
                     >
                       Check Payment Status
