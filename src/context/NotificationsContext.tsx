@@ -42,6 +42,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   const notificationsRef = useRef<Notification[]>([]);
+  const fetchedRef = useRef(false);
 
   useEffect(() => {
     notificationsRef.current = notifications;
@@ -87,11 +88,15 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!isAuthenticated) {
+      fetchedRef.current = false;
       resetState();
       return;
     }
 
-    refreshNotifications().catch(() => {});
+    if (!fetchedRef.current) {
+      fetchedRef.current = true;
+      refreshNotifications().catch(() => {});
+    }
   }, [isAuthenticated, refreshNotifications, resetState]);
 
   useEffect(() => {
