@@ -41,11 +41,11 @@ export default function AIChatPage() {
   const charBufferRef = useRef<string[]>([]);
   const charTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const streamDoneRef = useRef(false);
+  const isUserScrolledUp = useRef(false);
 
-  const isNearBottom = () => {
-    const el = containerRef.current;
-    if (!el) return true;
-    return el.scrollHeight - el.scrollTop - el.clientHeight < 100;
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    isUserScrolledUp.current = scrollHeight - scrollTop - clientHeight > 50;
   };
 
   const stopCharInterval = () => {
@@ -79,7 +79,7 @@ export default function AIChatPage() {
 
   useEffect(() => {
     localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(messages.slice(-50)));
-    if (isNearBottom()) {
+    if (!isUserScrolledUp.current) {
       endRef.current?.scrollIntoView({ behavior: sending ? "auto" : "smooth" });
     }
   }, [messages, sending]);
@@ -180,7 +180,7 @@ export default function AIChatPage() {
         </button>
       </header>
 
-      <main ref={containerRef} className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6">
+      <main ref={containerRef} onScroll={handleScroll} className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6">
         <div className="max-w-full lg:max-w-7xl mx-auto space-y-6 px-0 lg:px-4">
 
           {messages.length === 0 && (
