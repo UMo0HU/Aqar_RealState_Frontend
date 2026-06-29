@@ -16,7 +16,6 @@ import {
   getSaleListingTone,
 } from "@/utils/propertyListing";
 import type { Lease, Property, RentRequest } from "@/types";
-
 import { usePropertyRentalContext } from "./usePropertyRentalContext";
 
 interface Props { property: Property }

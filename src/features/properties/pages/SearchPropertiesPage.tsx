@@ -96,11 +96,9 @@ export default function SearchPropertiesPage() {
 
   // ── Filter search (normal) ────────────────────────────────────────────────
   const hasActiveFilters = mode === "filter" && (
-    searchParams.has("propertyType") || searchParams.has("location") ||
+    searchParams.has("q") ||
     searchParams.has("bedrooms") || searchParams.has("bathrooms") ||
-    searchParams.has("minPrice") || searchParams.has("maxPrice") ||
-    searchParams.has("minSize") || searchParams.has("maxSize") ||
-    searchParams.has("furnished")
+    searchParams.has("minSize") || searchParams.has("maxSize")
   );
 
   useEffect(() => {
@@ -114,21 +112,17 @@ export default function SearchPropertiesPage() {
     const run = async () => {
       try {
         const filters: Record<string, string | number> = {};
-        const loc  = searchParams.get("location");
+        const q    = searchParams.get("q");
         const br   = searchParams.get("bedrooms");
         const ba   = searchParams.get("bathrooms");
-        const minP = searchParams.get("minPrice");
-        const maxP = searchParams.get("maxPrice");
         const minS = searchParams.get("minSize");
         const maxS = searchParams.get("maxSize");
 
-        if (loc)  filters.location  = loc;
+        if (q)    filters.location  = q;
         if (br)   filters.bedrooms  = Number(br);
         if (ba)   filters.bathrooms = Number(ba);
         if (minS) filters.minSize   = Number(minS);
         if (maxS) filters.maxSize   = Number(maxS);
-        if (minP) filters.minPrice  = Number(minP);
-        if (maxP) filters.maxPrice  = Number(maxP);
 
         const res = await getProperties(filters);
         if (cancelled) return;
@@ -137,13 +131,13 @@ export default function SearchPropertiesPage() {
           .map(mapProperty)
           .filter(isPubliclyVisibleProperty);
 
-        const rawPropertyType = searchParams.get("propertyType");
-        if (rawPropertyType === "for_rent" || rawPropertyType === "for_sale") {
-          filtered = filtered.filter((p) => p.property_type === rawPropertyType);
-        }
-
-        if (searchParams.get("furnished") === "1") {
-          filtered = filtered.filter((p) => p.is_furnished);
+        if (q) {
+          const lower = q.toLowerCase();
+          filtered = filtered.filter((p) =>
+            p.propertyName.toLowerCase().includes(lower) ||
+            p.propertyDesc.toLowerCase().includes(lower) ||
+            p.location.toLowerCase().includes(lower),
+          );
         }
 
         setProperties(sortPropertiesWithLocalSponsorship(filtered));
@@ -187,24 +181,11 @@ export default function SearchPropertiesPage() {
     const params = new URLSearchParams();
     params.set("mode", "filter");
 
-    if (filters.propertyType) params.set("propertyType", filters.propertyType);
-    if (filters.location)     params.set("location", filters.location);
-    if (filters.bedrooms)     params.set("bedrooms", String(filters.bedrooms));
-    if (filters.bathrooms)    params.set("bathrooms", String(filters.bathrooms));
-    if (filters.minSize)      params.set("minSize", String(filters.minSize));
-    if (filters.maxSize)      params.set("maxSize", String(filters.maxSize));
-    if (filters.furnished)    params.set("furnished", "1");
-
-    if (filters.propertyType === "for_sale") {
-      if (filters.minPrice != null) params.set("minPrice", String(filters.minPrice));
-      if (filters.maxPrice != null) params.set("maxPrice", String(filters.maxPrice));
-    } else {
-      const unit = filters.pricingUnit ?? "MONTH";
-      params.set("pricingUnit", unit);
-      const divisor = unit === "MONTH" ? 30 : 1;
-      if (filters.minPrice != null) params.set("minPrice", String(filters.minPrice / divisor));
-      if (filters.maxPrice != null) params.set("maxPrice", String(filters.maxPrice / divisor));
-    }
+    if (filters.search)    params.set("q", filters.search);
+    if (filters.bedrooms)  params.set("bedrooms", String(filters.bedrooms));
+    if (filters.bathrooms) params.set("bathrooms", String(filters.bathrooms));
+    if (filters.minSize)   params.set("minSize", String(filters.minSize));
+    if (filters.maxSize)   params.set("maxSize", String(filters.maxSize));
 
     const qs = params.toString();
     navigate(`/search?${qs}`, { replace: true });
@@ -225,23 +206,12 @@ export default function SearchPropertiesPage() {
   };
 
   // ── Initial values for the filter panel ───────────────────────────────────
-  const rawPropertyType = searchParams.get("propertyType");
-  const initialPropertyType = rawPropertyType === "for_rent" || rawPropertyType === "for_sale" ? rawPropertyType : undefined;
-
-  const urlPricingUnit = (searchParams.get("pricingUnit") ?? "MONTH") as "MONTH" | "DAY";
-  const priceDivisor   = initialPropertyType === "for_sale" ? 1 : (urlPricingUnit === "MONTH" ? 30 : 1);
-
   const initialFilters: FilterValues = {
-    location:     searchParams.get("location") ?? undefined,
-    propertyType: initialPropertyType,
-    minPrice:     searchParams.get("minPrice") ? Number(searchParams.get("minPrice")) * priceDivisor : undefined,
-    maxPrice:     searchParams.get("maxPrice") ? Number(searchParams.get("maxPrice")) * priceDivisor : undefined,
-    pricingUnit:  urlPricingUnit,
-    bedrooms:     searchParams.get("bedrooms") ? Number(searchParams.get("bedrooms")) : undefined,
-    bathrooms:    searchParams.get("bathrooms") ? Number(searchParams.get("bathrooms")) : undefined,
-    minSize:      searchParams.get("minSize") ? Number(searchParams.get("minSize")) : undefined,
-    maxSize:      searchParams.get("maxSize") ? Number(searchParams.get("maxSize")) : undefined,
-    furnished:    searchParams.get("furnished") === "1",
+    search:    searchParams.get("q") ?? undefined,
+    bedrooms:  searchParams.get("bedrooms") ? Number(searchParams.get("bedrooms")) : undefined,
+    bathrooms: searchParams.get("bathrooms") ? Number(searchParams.get("bathrooms")) : undefined,
+    minSize:   searchParams.get("minSize") ? Number(searchParams.get("minSize")) : undefined,
+    maxSize:   searchParams.get("maxSize") ? Number(searchParams.get("maxSize")) : undefined,
   };
 
   const showNoResults = !loading && !error && properties.length === 0 && (
@@ -304,7 +274,7 @@ export default function SearchPropertiesPage() {
             {mode === "filter" && (
               <>
                 <h1 className="text-2xl font-bold text-gray-900">Filter Search</h1>
-                <p className="text-sm text-gray-500">Refine results by location, price, size, and more.</p>
+                <p className="text-sm text-gray-500">Refine results by keyword, price, size, and more.</p>
                   <SearchFilterPanel
                     initial={initialFilters}
                     onApply={handleFilterApply}

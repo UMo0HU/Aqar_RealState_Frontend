@@ -1,4 +1,4 @@
-import type { ChangeEvent, Dispatch, FC, KeyboardEvent, SetStateAction } from 'react';
+import type { ChangeEvent, ClipboardEvent, Dispatch, FC, KeyboardEvent, SetStateAction } from 'react';
 import { useRef } from 'react';
 
 const OTPInput : FC<{otpMsg : string , otp: string[], setOtp : Dispatch<SetStateAction<string[]>>}> = (props) => {
@@ -45,6 +45,19 @@ const OTPInput : FC<{otpMsg : string , otp: string[], setOtp : Dispatch<SetState
         }
     }
 
+    function pasteHandler(e: ClipboardEvent<HTMLInputElement>) {
+        e.preventDefault();
+        const pasted = e.clipboardData.getData('text');
+        const digits = pasted.replace(/\D/g, '').split('').slice(0, length);
+
+        const newOtp = [...props.otp];
+        digits.forEach((digit, i) => { newOtp[i] = digit; });
+        props.setOtp(newOtp);
+
+        const focusIndex = Math.min(digits.length, length - 1);
+        focusInput(focusIndex);
+    }
+
     return (
         <>
         <div className="flex justify-center">
@@ -56,6 +69,7 @@ const OTPInput : FC<{otpMsg : string , otp: string[], setOtp : Dispatch<SetState
                     value={props.otp[index]}
                     onChange={(e) => changeHandler(e, index)}
                     onKeyDown={(e) => keyDownHandler(e, index)}
+                    onPaste={pasteHandler}
                     ref={(el) => addToRef(el, index)}
                     className="w-8 sm:w-10 h-10 sm:h-12 mx-0.5 sm:mx-1 mb-4 text-center rounded-md text-[24px] border border-gray-300 bg-gray-200 shadow"
                 />

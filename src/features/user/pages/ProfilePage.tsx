@@ -8,6 +8,7 @@ import { useAuth }       from "@/context/AuthContext";
 import { useToast }      from "@/context/ToastContext";
 import type { UserProfile } from "@/types";
 
+
 export default function ProfilePage() {
   const { userInfo, login, token } = useAuth();
   const navigate = useNavigate();

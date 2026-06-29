@@ -7,6 +7,8 @@ import { useToast }                  from "@/context/ToastContext";
 import { useAuth }                   from "@/context/AuthContext";
 import { BASE_URL }                  from "@/api/axiosInstance";
 
+
+
 interface NewChatState {
   receiverId:   string;
   propertyId:   number | string;

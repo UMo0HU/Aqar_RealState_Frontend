@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useParams }      from "react-router-dom";
 
 import { getSocket }                                from "@/api/socket";
 import { useAuth }                                  from "@/context/AuthContext";
+
 import { useChatSync }                              from "@/context/ChatSyncProvider";
 import { useToast }                                 from "@/context/ToastContext";
 import NavBar                                       from "@/features/properties/components/NavBar";
