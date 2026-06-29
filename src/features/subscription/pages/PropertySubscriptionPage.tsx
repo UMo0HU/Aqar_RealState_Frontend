@@ -75,7 +75,7 @@ export default function PropertySubscriptionPage() {
       const stored = syncStoredListingSubscriptionWithProperty(nextProperty)
         ?? getStoredListingSubscription(nextProperty.propertyId);
       let sub: ListingSubscriptionRecord | null = null;
-      if (stored?.paymentState === "PENDING") {
+      if (stored?.paymentState === "PENDING" || !stored) {
         sub = await fetchSubscriptionFromApi(nextProperty.propertyId);
       }
       setSubscription(sub ?? stored);
