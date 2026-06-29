@@ -117,7 +117,7 @@ export default function AIChatPage() {
             charBufferRef.current.push(char);
           }
           if (!charTimerRef.current) {
-            charTimerRef.current = setInterval(outputNextChar, 30);
+            charTimerRef.current = setInterval(outputNextChar, 10);
           }
         },
         onProperties: (properties) => {
