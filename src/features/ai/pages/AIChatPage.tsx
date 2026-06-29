@@ -36,10 +36,17 @@ export default function AIChatPage() {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const aiMessageIdRef = useRef<string | null>(null);
   const charBufferRef = useRef<string[]>([]);
   const charTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const streamDoneRef = useRef(false);
+
+  const isNearBottom = () => {
+    const el = containerRef.current;
+    if (!el) return true;
+    return el.scrollHeight - el.scrollTop - el.clientHeight < 100;
+  };
 
   const stopCharInterval = () => {
     if (charTimerRef.current !== null) {
@@ -72,7 +79,9 @@ export default function AIChatPage() {
 
   useEffect(() => {
     localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(messages.slice(-50)));
-    endRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (isNearBottom()) {
+      endRef.current?.scrollIntoView({ behavior: sending ? "auto" : "smooth" });
+    }
   }, [messages, sending]);
 
   useEffect(() => {
@@ -171,7 +180,7 @@ export default function AIChatPage() {
         </button>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6">
+      <main ref={containerRef} className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6">
         <div className="max-w-full lg:max-w-7xl mx-auto space-y-6 px-0 lg:px-4">
 
           {messages.length === 0 && (
