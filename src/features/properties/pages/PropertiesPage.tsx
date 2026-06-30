@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
 
 import NavBar          from "@/features/properties/components/NavBar";
 import PropertyCard    from "@/features/properties/components/PropertyCard";
@@ -14,6 +14,7 @@ import { mapProperty }    from "@/utils/mapProperty";
 import type { Property }  from "@/types";
 
 export default function PropertiesPage() {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const type = (searchParams.get("type") ?? "for_rent") as "for_sale" | "for_rent";
 
@@ -21,7 +22,6 @@ export default function PropertiesPage() {
 
   const [all,     setAll]     = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search,  setSearch]  = useState("");
 
   useEffect(() => {
     setLoading(true);
@@ -46,14 +46,7 @@ export default function PropertiesPage() {
   };
 
   const displayed = sortPropertiesWithLocalSponsorship(
-    all
-      .filter((p) => p.property_type === type)
-      .filter((p) =>
-      search
-        ? p.propertyName.toLowerCase().includes(search.toLowerCase()) ||
-          p.location.toLowerCase().includes(search.toLowerCase())
-        : true
-      ),
+    all.filter((p) => p.property_type === type),
   );
 
   const isRent = type === "for_rent";
@@ -95,7 +88,10 @@ export default function PropertiesPage() {
             </div>
 
             <SearchBar
-              onSearch={(q) => setSearch(q)}
+              onSearch={(q) => {
+                if (!q.trim()) return;
+                navigate(`/search?mode=smart&q=${encodeURIComponent(q.trim())}`);
+              }}
               placeholder={`Search ${isRent ? "rentals" : "properties for sale"}…`}
             />
           </div>
@@ -114,18 +110,8 @@ export default function PropertiesPage() {
             <div className="text-center py-24 space-y-3">
               <p className="text-5xl">{isRent ? "🏠" : "🏡"}</p>
               <p className="text-xl font-bold text-gray-700">
-                {search
-                  ? `No results for "${search}"`
-                  : `No ${isRent ? "rental" : "sale"} properties available right now.`}
+                No {isRent ? "rental" : "sale"} properties available right now.
               </p>
-              {search && (
-                <button
-                  onClick={() => setSearch("")}
-                  className="mt-2 bg-dark-knight text-white px-6 py-3 rounded-xl font-bold hover:opacity-90 transition"
-                >
-                  Clear Search
-                </button>
-              )}
             </div>
           )}
 
